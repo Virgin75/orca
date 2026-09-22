@@ -84,6 +84,8 @@ export type PRInfo = {
   /** PR head branch name. Lets linked-PR consumers detect that the worktree
    *  has switched to a different branch and the durable link is stale. */
   headRefName?: string
+  /** Label names; absent when the lookup (or an older host) did not fetch labels. */
+  labels?: string[]
   prRepo?: GitHubRepositoryIdentity
   headRepo?: GitHubRepositoryIdentity
   conflictSummary?: PRConflictSummary

@@ -12,6 +12,7 @@ import {
 } from './repository-routing'
 import { settingsForGitHubRepoOwner } from './work-item-routing'
 import { buildPRRefreshCandidate } from './worktree-refresh'
+import { isPullRequestGroupBy } from '../../../../shared/workspace-pr-grouping'
 
 export const createStaleWorktreeRefreshActions = (
   get: Parameters<StateCreator<AppState>>[1]
@@ -40,7 +41,7 @@ export const createStaleWorktreeRefreshActions = (
     const cardProps = state.worktreeCardProperties ?? []
     const rawCardProps = cardProps as readonly string[]
     const shouldRefreshPR =
-      state.groupBy === 'pr-status' ||
+      isPullRequestGroupBy(state.groupBy) ||
       (state.settings?.experimentalNewWorktreeCardStyle === true
         ? cardProps.includes('status')
         : cardProps.includes('pr') || rawCardProps.includes('ci')) ||

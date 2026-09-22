@@ -5512,7 +5512,8 @@
           "219ebf1961": "Branch name",
           "folderPathIdentity": "Branch / folder path",
           "cli": "Orca CLI",
-          "workspaceOptions": "Workspace options"
+          "workspaceOptions": "Workspace options",
+          "prLabel": "Label"
         },
         "SshTargetRow": {
           "4677394048": "Connecting…",
@@ -5994,7 +5995,9 @@
               "682ed5d551": "Closed",
               "7c2f009786": "In progress",
               "6798dc7c94": "In review",
-              "5076efc3d2": "Done"
+              "5076efc3d2": "Done",
+              "prLabelNoPR": "No PR",
+              "prLabelOther": "Other"
             }
           }
         },
@@ -6369,6 +6372,14 @@
           "architectureMismatch": "A Git-related executable could not run because its CPU architecture is incompatible with this execution host. Install Git and related tools for the host architecture.",
           "copyCommand": "Copy command",
           "copyDiagnostics": "Copy diagnostics"
+        },
+        "SidebarPRLabelGroupsSection": {
+          "none": "None",
+          "count": "{{value0}} labels",
+          "title": "Label groups",
+          "hint": "First checked label wins",
+          "clear": "Clear",
+          "empty": "No PR labels found yet"
         }
       },
       "shared": {

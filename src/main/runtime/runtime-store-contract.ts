@@ -96,6 +96,7 @@ export type RuntimeStore = {
     visibleTaskProviders?: GlobalSettings['visibleTaskProviders']
     defaultRepoSelection?: GlobalSettings['defaultRepoSelection']
     defaultLinearTeamSelection?: GlobalSettings['defaultLinearTeamSelection']
+    prLabelGroups?: GlobalSettings['prLabelGroups']
     githubProjects?: GlobalSettings['githubProjects']
     experimentalNewWorktreeCardStyle?: GlobalSettings['experimentalNewWorktreeCardStyle']
     compactWorktreeCards?: GlobalSettings['compactWorktreeCards']

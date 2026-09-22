@@ -6,8 +6,8 @@ import {
   getWorkspaceStatusFromGroupKey,
   getWorkspaceStatusVisualMeta
 } from '../../workspace-status'
-import { PROJECT_GROUP_META, PR_GROUP_META } from './group-keys'
-import type { PRGroupKey } from './group-keys'
+import { PROJECT_GROUP_META, PR_GROUP_META, getPRGroupKeyFromLaneKey } from './group-keys'
+import { getPRLabelLaneMeta } from './pr-label-lanes'
 import type { NoticeHostContext } from './host-labels'
 import {
   getLaneHostWorktreeCounts,
@@ -122,8 +122,10 @@ export function appendOrderedGroups(
               }
             })()
           : (() => {
-              const prGroup = key.replace(/^pr:/, '') as PRGroupKey
-              const meta = PR_GROUP_META[prGroup]
+              const meta =
+                groupBy === 'pr-label'
+                  ? getPRLabelLaneMeta(key)
+                  : PR_GROUP_META[getPRGroupKeyFromLaneKey(key)]
               return {
                 type: 'header' as const,
                 key,

@@ -21,6 +21,7 @@ import { PROJECT_ORDER_OPTIONS, SORT_OPTIONS } from './sidebar-workspace-option-
 import { WorktreeCardDisplayMenuSection } from './WorktreeCardDisplayMenuSection'
 import { translate } from '@/i18n/i18n'
 import { SidebarGroupByToggle } from './SidebarGroupByToggle'
+import { SidebarPRLabelGroupsSection } from './SidebarPRLabelGroupsSection'
 
 export function useWorkspaceOptionsFilterBadge(): {
   hasAnyFilter: boolean
@@ -142,6 +143,9 @@ export function WorkspaceOptionsMenuItems({
       <div className="px-2 pt-0.5 pb-1">
         <SidebarGroupByToggle groupBy={groupBy} setGroupBy={setGroupBy} />
       </div>
+      {groupBy === 'pr-label' && (
+        <SidebarPRLabelGroupsSection preserveWorkspaceBoardOpen={preserveWorkspaceBoardOpen} />
+      )}
 
       <DropdownMenuSeparator />
       <DropdownMenuSub>

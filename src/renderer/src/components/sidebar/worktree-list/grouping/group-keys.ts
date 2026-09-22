@@ -28,6 +28,11 @@ export function getPRLaneKey(prGroup: PRGroupKey): string {
   return `pr:${prGroup}`
 }
 
+/** Checked inverse of getPRLaneKey; unknown keys fall back to the no-PR lane. */
+export function getPRGroupKeyFromLaneKey(key: string): PRGroupKey {
+  return PR_GROUP_ORDER.find((group) => getPRLaneKey(group) === key) ?? 'in-progress'
+}
+
 export const PR_GROUP_META: Record<
   PRGroupKey,
   {
@@ -105,53 +110,81 @@ export function getWorktreeLineageGroupKey(worktree: Pick<Worktree, 'id' | 'host
   return getLineageGroupKey(worktree.hostId ? getWorktreeHostIdentity(worktree) : worktree.id)
 }
 
+type CachedWorktreePR = { number?: number; state?: string; labels?: string[] }
+
+function readCachedPRField(value: object, key: string): unknown {
+  return key in value ? Reflect.get(value, key) : undefined
+}
+
+/** `undefined` = no cache entry (try the next key); `null` = entry without PR data. */
+function readCachedPREntry(
+  prCache: Record<string, unknown>,
+  key: string
+): CachedWorktreePR | null | undefined {
+  const entry = prCache[key]
+  if (typeof entry !== 'object' || entry === null) {
+    return undefined
+  }
+  const data = readCachedPRField(entry, 'data')
+  if (typeof data !== 'object' || data === null) {
+    return null
+  }
+  const number = readCachedPRField(data, 'number')
+  const state = readCachedPRField(data, 'state')
+  const labels = readCachedPRField(data, 'labels')
+  return {
+    ...(typeof number === 'number' ? { number } : {}),
+    ...(typeof state === 'string' ? { state } : {}),
+    ...(Array.isArray(labels)
+      ? { labels: labels.filter((label): label is string => typeof label === 'string') }
+      : {})
+  }
+}
+
+/** The worktree's cached PR, or undefined when none is known or it is suppressed. */
+export function getWorktreeCachedPR(
+  worktree: Worktree,
+  repoMap: Map<string, Repo>,
+  prCache: Record<string, unknown> | null,
+  settings?: AppState['settings']
+): CachedWorktreePR | undefined {
+  const repo = repoMap.get(worktree.repoId)
+  const branch = branchName(worktree.branch)
+  if (!prCache || !repo || !branch) {
+    return undefined
+  }
+  const repoScopedCacheKey = getGitHubPRCacheKey(
+    repo.path,
+    repo.id,
+    branch,
+    settings,
+    repo.connectionId,
+    repo.executionHostId,
+    true
+  )
+  const canUseLegacyPRCache = !repo.connectionId && !repo.executionHostId
+  // Why: PR refreshes now write repo-id scoped entries; legacy path entries may
+  // still exist from persisted cache, but must not override fresher repo data.
+  let pr = readCachedPREntry(prCache, repoScopedCacheKey)
+  if (pr === undefined && canUseLegacyPRCache) {
+    pr =
+      readCachedPREntry(prCache, getLegacyGitHubPRCacheKey(repo.path, repo.id, branch)) ??
+      readCachedPREntry(prCache, getLegacyGitHubPRCacheKey(repo.path, undefined, branch))
+  }
+  if (!pr || (typeof pr.number === 'number' && isGitHubPRSuppressed(worktree, pr.number))) {
+    return undefined
+  }
+  return pr
+}
+
 export function getPRGroupKey(
   worktree: Worktree,
   repoMap: Map<string, Repo>,
   prCache: Record<string, unknown> | null,
   settings?: AppState['settings']
 ): PRGroupKey {
-  const repo = repoMap.get(worktree.repoId)
-  const branch = branchName(worktree.branch)
-  const repoScopedCacheKey =
-    repo && branch
-      ? getGitHubPRCacheKey(
-          repo.path,
-          repo.id,
-          branch,
-          settings,
-          repo.connectionId,
-          repo.executionHostId,
-          true
-        )
-      : ''
-  const canUseLegacyPRCache = repo !== undefined && !repo.connectionId && !repo.executionHostId
-  const legacyRepoScopedCacheKey =
-    canUseLegacyPRCache && branch ? getLegacyGitHubPRCacheKey(repo.path, repo.id, branch) : ''
-  const legacyPathScopedCacheKey =
-    canUseLegacyPRCache && branch ? getLegacyGitHubPRCacheKey(repo.path, undefined, branch) : ''
-  // Why: PR refreshes now write repo-id scoped entries; legacy path entries may
-  // still exist from persisted cache, but must not override fresher repo data.
-  const prEntry = prCache
-    ? ((repoScopedCacheKey
-        ? (prCache[repoScopedCacheKey] as
-            | { data?: { number?: number; state?: string } }
-            | undefined)
-        : undefined) ??
-      (legacyRepoScopedCacheKey
-        ? (prCache[legacyRepoScopedCacheKey] as
-            | { data?: { number?: number; state?: string } }
-            | undefined)
-        : undefined) ??
-      (legacyPathScopedCacheKey
-        ? (prCache[legacyPathScopedCacheKey] as
-            | { data?: { number?: number; state?: string } }
-            | undefined)
-        : undefined))
-    : undefined
-  const pr = prEntry?.data
-
-  if (!pr || (typeof pr.number === 'number' && isGitHubPRSuppressed(worktree, pr.number))) {
+  const pr = getWorktreeCachedPR(worktree, repoMap, prCache, settings)
+  if (!pr) {
     return 'in-progress'
   }
   if (pr.state === 'merged') {

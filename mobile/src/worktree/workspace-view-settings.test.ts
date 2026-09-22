@@ -32,6 +32,8 @@ describe('group mode mapping', () => {
     expect(groupModeFromDesktop('workspace-status')).toBe('workspaceStatus')
     expect(groupModeFromDesktop('pr-status')).toBe('prStatus')
     expect(groupModeFromDesktop(undefined)).toBeNull()
+    // Desktop-only mode: the phone keeps its current grouping.
+    expect(groupModeFromDesktop('pr-label')).toBeNull()
   })
 })
 

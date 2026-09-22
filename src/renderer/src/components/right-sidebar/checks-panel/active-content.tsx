@@ -16,6 +16,7 @@ import { PRTriageStrip } from './triage-strip'
 import { ConflictingFilesSection, MergeConflictNotice } from './conflict-summary'
 import { ChecksList } from './checks-list'
 import { PRCommentsList } from './comments-list'
+import { ChecksPanelReviewLabels } from './review-labels'
 import { translate } from '@/i18n/i18n'
 import type { ChecksPanelReview } from '../checks-panel-review'
 import type { ChecksPanelHostedReviewModifierDestination } from '../checks-panel-hosted-review-click-routing'
@@ -192,6 +193,14 @@ export function ChecksPanelActiveContent({
             <Pencil className="size-3 text-muted-foreground/40 can-hover:opacity-0 group-hover/title:opacity-100 transition-opacity shrink-0 mt-0.5" />
           </div>
         )}
+
+        {activeReview.provider === 'github' && repo ? (
+          <ChecksPanelReviewLabels
+            review={activeReview}
+            repo={repo}
+            onMutated={refreshHostedReviewAfterMutation}
+          />
+        ) : null}
 
         {/* Updated at */}
         {activeReview.updatedAt && (

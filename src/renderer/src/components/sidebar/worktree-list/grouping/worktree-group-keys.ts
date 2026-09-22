@@ -5,6 +5,7 @@ import { getWorkspaceStatus, getWorkspaceStatusGroupKey } from '../../workspace-
 import { cloneDefaultWorkspaceStatuses } from '../../../../../../shared/workspace-statuses'
 import type { AppState } from '../../../../store/types'
 import { ALL_GROUP_KEY, getPRGroupKey, getProjectGroupHeaderKey } from './group-keys'
+import { getPRLabelLaneKeyForWorktree } from './pr-label-lanes'
 import { buildProjectGroupingIndex, getProjectGroupingForRepo } from './project-grouping'
 import type { ProjectGroupingModel } from './project-grouping'
 import type { WorktreeGroupBy } from './row-types'
@@ -30,6 +31,9 @@ export function getGroupKeyForWorktree(
       repoMap,
       buildProjectGroupingIndex(projectGrouping)
     ).key
+  }
+  if (groupBy === 'pr-label') {
+    return getPRLabelLaneKeyForWorktree(worktree, repoMap, prCache, settings)
   }
   return `pr:${getPRGroupKey(worktree, repoMap, prCache, settings)}`
 }

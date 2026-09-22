@@ -14,6 +14,11 @@ import {
 } from './folder-workspace-lanes'
 import { PR_GROUP_META, PR_GROUP_ORDER, getPRGroupKey, getPRLaneKey } from './group-keys'
 import type { PRGroupKey } from './group-keys'
+import {
+  getPRLabelLaneKeyForWorktree,
+  getPRLabelLaneMeta,
+  getPRLabelLaneOrder
+} from './pr-label-lanes'
 import { addRepoIdToGroup, getProjectGroupingForRepo } from './project-grouping'
 import type {
   OrderedGroupEntry,
@@ -40,6 +45,9 @@ function getLaneLabelForKey(
   }
   if (groupBy === 'pr-status') {
     return PR_GROUP_META[key.replace(/^pr:/, '') as PRGroupKey].label
+  }
+  if (groupBy === 'pr-label') {
+    return getPRLabelLaneMeta(key).label
   }
   return key
 }
@@ -93,6 +101,9 @@ export function buildOrderedGroups(args: {
       key = getWorkspaceStatusGroupKey(workspaceStatus)
       label =
         workspaceStatuses.find((status) => status.id === workspaceStatus)?.label ?? workspaceStatus
+    } else if (groupBy === 'pr-label') {
+      key = getPRLabelLaneKeyForWorktree(w, repoMap, prCache, settings)
+      label = getPRLabelLaneMeta(key).label
     } else {
       const prGroup = getPRGroupKey(w, repoMap, prCache, settings)
       key = getPRLaneKey(prGroup)
@@ -208,6 +219,13 @@ export function buildOrderedGroups(args: {
   if (groupBy === 'pr-status') {
     for (const prGroup of PR_GROUP_ORDER) {
       const key = `pr:${prGroup}`
+      const group = grouped.get(key)
+      if (group) {
+        orderedGroups.push([key, group])
+      }
+    }
+  } else if (groupBy === 'pr-label') {
+    for (const key of getPRLabelLaneOrder(settings)) {
       const group = grouped.get(key)
       if (group) {
         orderedGroups.push([key, group])
