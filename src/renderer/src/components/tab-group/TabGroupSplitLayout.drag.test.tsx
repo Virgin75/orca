@@ -25,6 +25,10 @@ vi.mock('./TabGroupPanel', () => ({
   default: ({ groupId }: { groupId: string }) => <div data-testid={`panel-${groupId}`} />
 }))
 
+vi.mock('../workspace-header/WorkspaceHeader', () => ({
+  WorkspaceHeader: () => null
+}))
+
 vi.mock('./useTabDragSplit', () => ({
   useTabDragSplit: () => ({
     activeDrag: null,

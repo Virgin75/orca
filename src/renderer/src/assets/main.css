@@ -952,6 +952,10 @@ html.native-shell .app-layout {
   -webkit-app-region: no-drag;
 }
 
+.workspace-header-no-drag {
+  -webkit-app-region: no-drag;
+}
+
 /* Why: the right sidebar header extends to the window's right edge. When custom
    desktop chrome is active, the fixed-position window-controls overlay sits on
    top of that edge, so we add matching padding-right so the header's close

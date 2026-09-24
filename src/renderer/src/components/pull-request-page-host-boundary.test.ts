@@ -22,6 +22,7 @@ function sourceBetween(source: string, startPattern: string, endPattern: string)
 
 const reviewersSource = joinedSource([
   'pull-request-page/reviewers/panel.tsx',
+  'pull-request-page/reviewers/use-reviewer-picker-state.ts',
   'pull-request-page/reviewers/request-actions.ts',
   'pull-request-page/reviewers/picker.tsx',
   'pull-request-page/reviewers/requested-list.tsx'

@@ -17105,6 +17105,17 @@
         "9a4c6b2d7e": "Skill sharing",
         "3d8e5f1b9c": "Share skills behind an unlisted link and install them on any machine you use.",
         "c5b3e8a17d": "Sign in to Orca"
+      },
+      "workspaceHeader": {
+        "addReviewer": "Add reviewer",
+        "editReviewers": "Edit reviewers",
+        "openReview": "Open {{value0}} #{{value1}}",
+        "openChecks": "Show checks",
+        "branch": "Branch",
+        "checksCount": "{{value0}}/{{value1}} checks",
+        "pendingComment": "1 pending comment",
+        "pendingComments": "{{value0}} pending comments",
+        "reviewerNames": "Reviewer: {{value0}}"
       }
     },
     "i18n": {

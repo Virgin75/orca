@@ -22,7 +22,7 @@ export function ChecksPanelReviewLabels({
   repo,
   onMutated
 }: {
-  review: ChecksPanelReview
+  review: Pick<ChecksPanelReview, 'number' | 'url' | 'labels'>
   repo: { id: string; path: string }
   onMutated: () => Promise<void> | void
 }): React.JSX.Element {

@@ -6,6 +6,7 @@ import TabGroupPanel from './TabGroupPanel'
 import TabDragPreview from '../tab-bar/TabDragPreview'
 import { TabDragProvider } from './tab-drag-context'
 import TabPaneColumnSplitDragOverlay from './TabPaneColumnSplitDragOverlay'
+import { WorkspaceHeader } from '../workspace-header/WorkspaceHeader'
 import { type HoveredTabInsertion, useTabDragSplit } from './useTabDragSplit'
 
 const MIN_RATIO = 0.15
@@ -317,6 +318,7 @@ export default function TabGroupSplitLayout({
           className="flex flex-col flex-1 min-w-0 min-h-0 overflow-hidden border-l border-border"
         >
           <div className="h-[4px] shrink-0 bg-card" data-terminal-focus-release-surface="true" />
+          <WorkspaceHeader worktreeId={worktreeId} isWorktreeActive={isWorktreeActive} />
           <div className="flex flex-1 min-w-0 min-h-0 overflow-hidden">
             <SplitNode
               node={layout}
@@ -325,7 +327,8 @@ export default function TabGroupSplitLayout({
               focusedGroupId={focusedGroupId}
               isWorktreeActive={isWorktreeActive}
               hasSplitGroups={hasSplits}
-              touchesTopEdge={true}
+              // Why: the workspace header owns the top edge, including the floating-toggle spacers.
+              touchesTopEdge={false}
               touchesRightEdge={true}
               touchesLeftEdge={true}
               touchesBottomEdge={false}
