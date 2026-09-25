@@ -13,6 +13,7 @@ import { normalizeTerminalQuickCommands } from '../../../../shared/terminal-quic
 import { normalizeTerminalCustomThemes } from '../../../../shared/terminal-custom-themes'
 import { normalizeTaskProviderSettings } from '../../../../shared/task-providers'
 import { normalizeOpenInApplications } from '../../../../shared/open-in-applications'
+import { normalizeTestEnvironments } from '../../../../shared/test-environments'
 import { createSettingsSearchState, type SettingsSearchState } from './settings-search-state'
 import { isRuntimeCatalogListingStale } from './runtime-status-hydration'
 import { normalizeDisabledTuiAgents } from '../../../../shared/tui-agent-selection'
@@ -98,6 +99,11 @@ function normalizeSettingsUpdates(
   if ('openInApplications' in updates) {
     sanitizedUpdates.openInApplications = normalizeOpenInApplications(updates.openInApplications, {
       createId: createOpenInApplicationId
+    })
+  }
+  if ('testEnvironments' in updates) {
+    sanitizedUpdates.testEnvironments = normalizeTestEnvironments(updates.testEnvironments, {
+      createId: () => crypto.randomUUID()
     })
   }
   if ('disabledTuiAgents' in updates) {

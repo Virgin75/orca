@@ -138,6 +138,7 @@ export function buildDefaultSettings(args: {
     nativeChatResumeWorkOnRestart: false,
     nativeChatSessionOptions: {},
     openInApplications: [...DEFAULT_OPEN_IN_APPLICATIONS],
+    testEnvironments: [],
     rightSidebarOpenByDefault: true,
     showGitIgnoredFiles: true,
     sourceControlViewMode: 'list',

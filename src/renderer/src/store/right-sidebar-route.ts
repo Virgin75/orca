@@ -47,7 +47,8 @@ export function normalizeRightSidebarRoute(
     tab === 'source-control' ||
     tab === 'checks' ||
     tab === 'ports' ||
-    tab === 'notion'
+    tab === 'notion' ||
+    tab === 'test-env'
   ) {
     return {
       rightSidebarTab: tab,

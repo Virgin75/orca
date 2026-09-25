@@ -1004,6 +1004,11 @@
       },
       "clipboardWriteFailure": {
         "tooLarge": "The text is too large to copy."
+      },
+      "testEnvironmentDirectories": {
+        "repoRemoved": "Repository was removed.",
+        "otherHost": "Lives on a different host than this workspace.",
+        "newWorkspace": "New workspace from {{value0}}"
       }
     },
     "hooks": {
@@ -1148,7 +1153,9 @@
         "automationsDescription": "Schedule agent work and choose whether Automations appears in the sidebar.",
         "shareSkillsTitle": "Share Skills",
         "shareSkillsDescription": "Share your skills with an unlisted link. Anyone who has it can install them.",
-        "floatingWorkspaceWebDescription": "Global terminal and markdown tabs."
+        "floatingWorkspaceWebDescription": "Global terminal and markdown tabs.",
+        "testEnvironmentsTitle": "Test Environments",
+        "testEnvironmentsDescription": "Multi-repo environments with generated ports, launched from a workspace."
       },
       "useAppMenuPaste": {
         "pasteTooLarge": "Paste is too large."
@@ -12023,6 +12030,46 @@
         "TerminalRenderingSection": {
           "6d4c55bacc": "Inline Images",
           "fffab5890b": "Display images directly in the terminal using SIXEL, iTerm2 (IIP), and Kitty graphics protocols."
+        },
+        "testEnvironments": {
+          "editorTitle": "Test environment",
+          "editorDescription": "Reference a generated port as {{value0}} in env values and the public URL. Setup scripts also see each port as {{value1}}.",
+          "name": "Name",
+          "ports": "Random ports",
+          "portsHint": "Each launch picks a free port for every name below.",
+          "removePort": "Remove port",
+          "addPort": "Add port",
+          "publicUrl": "Public URL",
+          "repositories": "Repositories",
+          "addRepo": "Add repository",
+          "cancel": "Cancel",
+          "save": "Save",
+          "pickRepo": "Pick a repository",
+          "removeRepo": "Remove repository",
+          "addSetup": "Add setup",
+          "setupName": "Setup name (e.g. API server, Celery worker)",
+          "removeSetup": "Remove setup",
+          "envVars": "Environment variables",
+          "removeEnvVar": "Remove variable",
+          "addEnvVar": "Add variable",
+          "script": "Setup script (bash, runs after the variables are exported)",
+          "deleteTitle": "Delete \"{{value0}}\"?",
+          "deleteDescription": "Running instances keep their terminals, but you will no longer be able to launch it.",
+          "delete": "Delete",
+          "new": "New test environment",
+          "empty": "No test environments yet. Create one to launch several repositories together from a workspace.",
+          "untitled": "Untitled",
+          "summary": "{{value0}} setups, {{value1}} ports",
+          "edit": "Edit",
+          "title": "Test Environments",
+          "description": "Define environments that span several repositories. Launch them from the Test env panel of a workspace.",
+          "searchTitle": "Test environments",
+          "searchDescription": "Create, edit and delete multi-repo test environments with generated ports and setup scripts.",
+          "keywordTest": "test",
+          "keywordEnvironment": "environment",
+          "keywordPorts": "ports",
+          "keywordSetup": "setup",
+          "keywordStack": "stack"
         }
       },
       "right": {
@@ -12925,7 +12972,8 @@
             "aiVaultSessionHistory": "Agents",
             "folderWorkspaces": "Attached worktrees",
             "parentPrChecks": "PR Checks",
-            "notionTickets": "Notion tickets"
+            "notionTickets": "Notion tickets",
+            "testEnvironment": "Test env"
           },
           "right": {
             "panel": {
@@ -17152,6 +17200,28 @@
         "saveEdit": "Save",
         "edit": "Edit",
         "exitEdit": "Exit edit mode"
+      },
+      "testEnvironments": {
+        "noWorkspace": "Select a workspace first.",
+        "launchFailed": "Could not launch test env",
+        "envRemoved": "This test env no longer exists in Settings.",
+        "title": "Test env",
+        "manage": "Manage test environments",
+        "empty": "No test environment includes this repository yet.",
+        "create": "Create a test env",
+        "launch": "Launch",
+        "statusRunning": "Running",
+        "statusStopped": "Stopped",
+        "statusStarting": "Starting",
+        "copied": "Copied",
+        "openInOrcaBrowser": "Open in Orca browser",
+        "openInSystemBrowser": "Open in system browser",
+        "copyUrl": "Copy URL",
+        "showTerminal": "Show terminal",
+        "restart": "Restart",
+        "stop": "Stop",
+        "ports": "Ports",
+        "copyPort": "Copy port"
       }
     },
     "i18n": {

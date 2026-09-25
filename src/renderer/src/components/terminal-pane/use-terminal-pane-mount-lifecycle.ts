@@ -8,6 +8,7 @@ import { prepareTerminalPaneMount } from './terminal-pane-mount-preparation'
 import { createTerminalPaneManagerOptions } from './terminal-pane-manager-options'
 import { restoreTerminalPaneLayout } from './terminal-pane-layout-restore'
 import { runTerminalPaneBootstrapSplits } from './terminal-pane-mount-bootstrap'
+import { consumeTerminalCommandSplits } from '@/lib/terminal-command-split-queue'
 import { installTerminalPaneMountEvents } from './terminal-pane-mount-events'
 import { cleanupTerminalPaneMount } from './terminal-pane-mount-cleanup'
 import type { UseTerminalPaneLifecycleDeps } from './terminal-pane-lifecycle-types'
@@ -89,8 +90,13 @@ export function useTerminalPaneMountLifecycle(
       ptyDeps,
       setupSplit: deps.setupSplit,
       issueCommandSplit: deps.issueCommandSplit,
+      commandSplits: deps.commandSplits,
       isActive: deps.isActive
     })
+    // Why: the render-time snapshot keeps the grid for a StrictMode remount, so the queue can go now.
+    if (deps.commandSplits) {
+      consumeTerminalCommandSplits(deps.tabId, deps.commandSplits)
+    }
     shouldPersistLayout = true
     preparation.syncCanExpandState()
     preparation.syncPaneCount()

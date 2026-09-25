@@ -5,6 +5,7 @@ import { isWindowsUserAgent } from './pane-helpers'
 import type { SessionRestoredBannerReason } from './session-restored-banner-pane-state'
 import { useTerminalPaneStoreActions } from './use-terminal-pane-store-actions'
 import type { TerminalPaneChatController } from './use-terminal-pane-chat-state'
+import { peekTerminalCommandSplits } from '@/lib/terminal-command-split-queue'
 
 export function useTerminalPaneStoreBindings(controller: TerminalPaneChatController) {
   const { expectedLayoutLeafIds, isVisible, restoredLayout, tabId } = controller
@@ -48,6 +49,7 @@ export function useTerminalPaneStoreBindings(controller: TerminalPaneChatControl
   const [issueCommandSplit] = useState(
     () => useAppStore.getState().pendingIssueCommandSplitByTabId[tabId]
   )
+  const [commandSplits] = useState(() => peekTerminalCommandSplits(tabId))
 
   return {
     setTabLayout,
@@ -82,7 +84,8 @@ export function useTerminalPaneStoreBindings(controller: TerminalPaneChatControl
     setupSplit,
     consumeTabSetupSplit,
     issueCommandSplit,
-    consumeTabIssueCommandSplit
+    consumeTabIssueCommandSplit,
+    commandSplits
   }
 }
 

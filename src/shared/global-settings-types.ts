@@ -1,4 +1,5 @@
 import type { ExecutionHostId } from './execution-host'
+import type { TestEnvironment } from './test-environment-types'
 import type { GitHubProjectSettings } from './github/project-types'
 import type { VoiceSettings } from './speech-types'
 import type { AiVaultSearchSettings } from './ai-vault-search-settings'
@@ -235,6 +236,8 @@ export type GlobalSettings = {
   nativeChatSessionOptions?: PersistedNativeChatSessionOptions
   /** Extra launcher rows for the worktree "Open in" submenu. VS Code is always shown first. */
   openInApplications?: OpenInApplication[]
+  /** Multi-repo test environments launched from the right sidebar's Test env panel. */
+  testEnvironments?: TestEnvironment[]
   /** Deprecated: migration/backward-compat only. Use PersistedUIState.rightSidebarOpen. */
   rightSidebarOpenByDefault: boolean
   showGitIgnoredFiles?: boolean
