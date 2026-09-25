@@ -388,6 +388,9 @@ vi.mock('../notion', () => ({
 vi.mock('../test-environments', () => ({
   registerTestEnvironmentHandlers: vi.fn()
 }))
+vi.mock('../language-servers', () => ({
+  registerLanguageServerHandlers: vi.fn()
+}))
 
 vi.mock('../gitlab', () => ({
   registerGitLabHandlers: registerGitLabHandlersMock

@@ -64,12 +64,23 @@ function normalizeEnvVars(value: unknown, options: NormalizeOptions): TestEnviro
 
 function normalizeSetups(value: unknown, options: NormalizeOptions): TestEnvironmentSetup[] {
   const seen = new Set<string>()
-  return list(value, MAX_TEST_ENVIRONMENT_SETUPS).map((row, index) => ({
-    id: idOf(row, `setup-${index + 1}`, seen, options),
-    name: text(row.name, 200),
-    env: normalizeEnvVars(row.env, options),
-    script: text(row.script, MAX_TEST_ENVIRONMENT_SCRIPT_LENGTH)
-  }))
+  return list(value, MAX_TEST_ENVIRONMENT_SETUPS).map((row, index) => {
+    const setup: TestEnvironmentSetup = {
+      id: idOf(row, `setup-${index + 1}`, seen, options),
+      name: text(row.name, 200),
+      env: normalizeEnvVars(row.env, options),
+      script: text(row.script, MAX_TEST_ENVIRONMENT_SCRIPT_LENGTH)
+    }
+    const dependsOn = text(row.dependsOn, 200).trim()
+    if (dependsOn) {
+      setup.dependsOn = dependsOn
+    }
+    const readyPort = text(row.readyPort, 100).trim()
+    if (readyPort) {
+      setup.readyPort = readyPort
+    }
+    return setup
+  })
 }
 
 function normalizeRepos(value: unknown, options: NormalizeOptions): TestEnvironmentRepo[] {
@@ -139,6 +150,54 @@ export function findUnknownTestEnvironmentPlaceholders(
 
 export type TestEnvironmentValidationIssue = { path: string; message: string }
 
+export function listTestEnvironmentSetups(env: TestEnvironment): TestEnvironmentSetup[] {
+  return env.repos.flatMap((repo) => repo.setups)
+}
+
+function validateSetupDependencies(
+  env: TestEnvironment,
+  portNames: readonly string[]
+): TestEnvironmentValidationIssue[] {
+  const issues: TestEnvironmentValidationIssue[] = []
+  const setups = listTestEnvironmentSetups(env)
+  const byId = new Map(setups.map((setup) => [setup.id, setup]))
+  for (const setup of setups) {
+    if (setup.readyPort && !portNames.includes(setup.readyPort)) {
+      issues.push({
+        path: `setups.${setup.id}`,
+        message: `"${setup.name}" is ready on unknown port "${setup.readyPort}".`
+      })
+    }
+    if (!setup.dependsOn) {
+      continue
+    }
+    if (setup.dependsOn === setup.id) {
+      issues.push({ path: `setups.${setup.id}`, message: `"${setup.name}" depends on itself.` })
+    } else if (!byId.has(setup.dependsOn)) {
+      issues.push({
+        path: `setups.${setup.id}`,
+        message: `"${setup.name}" depends on a setup that no longer exists.`
+      })
+    }
+  }
+  // Why: a cycle would leave every setup in it waiting forever.
+  for (const start of setups) {
+    const seen = new Set<string>([start.id])
+    let next = start.dependsOn ? byId.get(start.dependsOn) : undefined
+    while (next && next.id !== start.id && !seen.has(next.id)) {
+      seen.add(next.id)
+      next = next.dependsOn ? byId.get(next.dependsOn) : undefined
+    }
+    if (next?.id === start.id && start.dependsOn !== start.id) {
+      issues.push({
+        path: `setups.${start.id}`,
+        message: `"${start.name}" is part of a dependency cycle.`
+      })
+    }
+  }
+  return issues
+}
+
 export function validateTestEnvironment(env: TestEnvironment): TestEnvironmentValidationIssue[] {
   const issues: TestEnvironmentValidationIssue[] = []
   if (!env.name.trim()) {
@@ -153,7 +212,10 @@ export function validateTestEnvironment(env: TestEnvironment): TestEnvironmentVa
         message: `Port name "${port.name}" must be letters, digits or underscores.`
       })
     } else if (seenPorts.has(port.name)) {
-      issues.push({ path: `ports.${port.id}`, message: `Port "${port.name}" is defined twice.` })
+      issues.push({
+        path: `ports.${port.id}`,
+        message: `Port "${port.name}" is defined twice.`
+      })
     }
     seenPorts.add(port.name)
   }
@@ -165,11 +227,17 @@ export function validateTestEnvironment(env: TestEnvironment): TestEnvironmentVa
       issues.push({ path: `repos.${repo.id}`, message: 'Pick a repository.' })
     }
     if (repo.setups.length === 0) {
-      issues.push({ path: `repos.${repo.id}`, message: 'Add at least one setup.' })
+      issues.push({
+        path: `repos.${repo.id}`,
+        message: 'Add at least one setup.'
+      })
     }
     for (const setup of repo.setups) {
       if (!setup.name.trim()) {
-        issues.push({ path: `setups.${setup.id}`, message: 'Setup name is required.' })
+        issues.push({
+          path: `setups.${setup.id}`,
+          message: 'Setup name is required.'
+        })
       }
       for (const envVar of setup.env) {
         if (!isValidTestEnvironmentPortName(envVar.key)) {
@@ -183,39 +251,19 @@ export function validateTestEnvironment(env: TestEnvironment): TestEnvironmentVa
         findUnknownTestEnvironmentPlaceholders(envVar.value, portNames)
       )
       for (const name of new Set(unknown)) {
-        issues.push({ path: `setups.${setup.id}`, message: `Unknown port "{{${name}}}".` })
+        issues.push({
+          path: `setups.${setup.id}`,
+          message: `Unknown port "{{${name}}}".`
+        })
       }
     }
   }
+  issues.push(...validateSetupDependencies(env, portNames))
   for (const name of findUnknownTestEnvironmentPlaceholders(env.publicUrl, portNames)) {
-    issues.push({ path: 'publicUrl', message: `Unknown port "{{${name}}}" in public URL.` })
+    issues.push({
+      path: 'publicUrl',
+      message: `Unknown port "{{${name}}}" in public URL.`
+    })
   }
   return issues
-}
-
-export const TEST_ENVIRONMENT_SCRIPT_ENV = 'ORCA_TEST_ENV_SCRIPT'
-export const TEST_ENVIRONMENT_PUBLIC_URL_ENV = 'ORCA_TEST_ENV_PUBLIC_URL'
-/** Typed into the pane's shell; the script itself travels in the pty env so it is never echoed. */
-export const TEST_ENVIRONMENT_SETUP_COMMAND = `bash -c "$${TEST_ENVIRONMENT_SCRIPT_ENV}"`
-
-/** Env for one setup pane: ports first, then the public URL, then the setup's own vars. */
-export function buildTestEnvironmentSetupEnv(args: {
-  setup: TestEnvironmentSetup
-  ports: TestEnvironmentPortValues
-  publicUrl: string
-}): Record<string, string> {
-  const env: Record<string, string> = {}
-  for (const [name, port] of Object.entries(args.ports)) {
-    env[name] = String(port)
-  }
-  if (args.publicUrl) {
-    env[TEST_ENVIRONMENT_PUBLIC_URL_ENV] = args.publicUrl
-  }
-  for (const envVar of args.setup.env) {
-    if (isValidTestEnvironmentPortName(envVar.key)) {
-      env[envVar.key] = renderTestEnvironmentTemplate(envVar.value, args.ports)
-    }
-  }
-  env[TEST_ENVIRONMENT_SCRIPT_ENV] = args.setup.script.trim() || 'true'
-  return env
 }

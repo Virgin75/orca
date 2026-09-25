@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import type { TestEnvironmentPortValues } from '../../../shared/test-environments'
+import type { TestEnvironment } from '../../../shared/test-environment-types'
 
 export type TestEnvironmentRunPane = {
   leafId: string
@@ -20,6 +21,8 @@ export type TestEnvironmentRun = {
   publicUrl: string
   panes: TestEnvironmentRunPane[]
   startedAt: number
+  /** Set for a one-off custom launch so Restart reuses its values instead of Settings. */
+  customEnv?: TestEnvironment
 }
 
 type TestEnvironmentRunsState = {

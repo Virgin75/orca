@@ -40,7 +40,7 @@ describe('resolveTestEnvironmentRepoDirectories', () => {
     path: '/app-feat'
   })
 
-  it('defaults to the current workspace but still offers its siblings and a new workspace', () => {
+  it('defaults to the current workspace and never offers the main checkout', () => {
     const result = resolveTestEnvironmentRepoDirectories({
       repoId: 'app',
       repo: repo({ id: 'app', path: '/app' }),
@@ -53,48 +53,48 @@ describe('resolveTestEnvironmentRepoDirectories', () => {
           isMainWorktree: true,
           branch: 'refs/heads/main'
         }),
-        current
+        current,
+        worktree({
+          repoId: 'app',
+          path: '/app-other',
+          branch: 'refs/heads/other'
+        })
       ]
     })
     expect(result.defaultValue).toBe('/app-feat')
     expect(result.options.map((option) => option.value)).toEqual([
-      '/app',
       '/app-feat',
+      '/app-other',
       NEW_WORKSPACE_OPTION_VALUE
     ])
   })
 
-  it('prefers the other repo worktree on the same branch, then the main checkout', () => {
-    const worktrees = [
-      worktree({
-        repoId: 'api',
-        path: '/api',
-        branch: 'refs/heads/main',
-        isMainWorktree: true
-      }),
-      worktree({
-        repoId: 'api',
-        path: '/api-feat',
-        branch: 'refs/heads/feat-x'
-      })
-    ]
-    const sameBranch = resolveTestEnvironmentRepoDirectories({
+  it('defaults other repos to a new worktree from their base ref', () => {
+    const result = resolveTestEnvironmentRepoDirectories({
       repoId: 'api',
       repo: repo({}),
       currentWorktree: current,
       currentRepo: repo({ id: 'app' }),
-      worktrees
+      worktrees: [
+        worktree({
+          repoId: 'api',
+          path: '/api',
+          branch: 'refs/heads/main',
+          isMainWorktree: true
+        }),
+        worktree({
+          repoId: 'api',
+          path: '/api-feat',
+          branch: 'refs/heads/feat-x'
+        })
+      ]
     })
-    expect(sameBranch.defaultValue).toBe('/api-feat')
-
-    const fallback = resolveTestEnvironmentRepoDirectories({
-      repoId: 'api',
-      repo: repo({}),
-      currentWorktree: worktree({ ...current, branch: 'refs/heads/other' }),
-      currentRepo: repo({ id: 'app' }),
-      worktrees
-    })
-    expect(fallback.defaultValue).toBe('/api')
+    expect(result.defaultValue).toBe(NEW_WORKSPACE_OPTION_VALUE)
+    expect(result.options.map((option) => option.value)).toEqual([
+      '/api-feat',
+      NEW_WORKSPACE_OPTION_VALUE
+    ])
+    expect(result.options.at(-1)?.label).toBe('New worktree from origin/main')
   })
 
   it('refuses a repo that lives on another host', () => {

@@ -103,11 +103,23 @@ const emojiShortcodeDatasetResource = {
   from: 'node_modules/emojibase-data/en/shortcodes/emojibase.json',
   to: 'node_modules/emojibase-data/en/shortcodes/emojibase.json'
 }
+// Why: language servers run under ELECTRON_RUN_AS_NODE, which cannot read app.asar, so they ship
+// as real directories; main resolves them from Resources/language-servers/<name>.
+const languageServerResources = [
+  'pyright',
+  'typescript-language-server',
+  'typescript-lsp-tsserver'
+].map((name) => ({
+  from: `node_modules/${name}`,
+  to: `language-servers/${name}`,
+  filter: ['**/*', '!node_modules{,/**/*}']
+}))
 const commonExtraResources = [
   relayExtraResource,
   bundledPluginResources,
   skillFreshnessResources,
-  emojiShortcodeDatasetResource
+  emojiShortcodeDatasetResource,
+  ...languageServerResources
 ]
 // Why: native speech addons must be real files outside app.asar; copy only the
 // package matching the artifact target instead of every optional variant.

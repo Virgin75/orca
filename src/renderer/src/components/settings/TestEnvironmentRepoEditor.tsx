@@ -17,6 +17,11 @@ import type {
   TestEnvironmentSetup
 } from '../../../../shared/test-environment-types'
 
+import {
+  TestEnvironmentSetupDependencyFields,
+  type TestEnvironmentSetupOption
+} from './TestEnvironmentSetupDependencyFields'
+
 // Code samples, not prose: kept out of the localization catalog.
 const ENV_KEY_SAMPLE = 'DATABASE_URL'
 const ENV_VALUE_SAMPLE = 'http://localhost:{{API_PORT}}'
@@ -26,12 +31,16 @@ export function TestEnvironmentRepoEditor({
   value,
   repos,
   usedRepoIds,
+  setupOptions,
+  portNames,
   onChange,
   onRemove
 }: {
   value: TestEnvironmentRepo
   repos: readonly Repo[]
   usedRepoIds: readonly string[]
+  setupOptions: readonly TestEnvironmentSetupOption[]
+  portNames: readonly string[]
   onChange: (next: TestEnvironmentRepo) => void
   onRemove: () => void
 }): React.JSX.Element {
@@ -83,6 +92,8 @@ export function TestEnvironmentRepoEditor({
         <SetupEditor
           key={setup.id}
           value={setup}
+          setupOptions={setupOptions}
+          portNames={portNames}
           onChange={updateSetup}
           onRemove={() =>
             onChange({ ...value, setups: value.setups.filter((item) => item.id !== setup.id) })
@@ -110,10 +121,14 @@ export function TestEnvironmentRepoEditor({
 
 function SetupEditor({
   value,
+  setupOptions,
+  portNames,
   onChange,
   onRemove
 }: {
   value: TestEnvironmentSetup
+  setupOptions: readonly TestEnvironmentSetupOption[]
+  portNames: readonly string[]
   onChange: (next: TestEnvironmentSetup) => void
   onRemove: () => void
 }): React.JSX.Element {
@@ -141,6 +156,13 @@ function SetupEditor({
           <X />
         </Button>
       </div>
+
+      <TestEnvironmentSetupDependencyFields
+        value={value}
+        setupOptions={setupOptions}
+        portNames={portNames}
+        onChange={onChange}
+      />
 
       <div className="flex flex-col gap-1">
         <span className="text-xs text-muted-foreground">

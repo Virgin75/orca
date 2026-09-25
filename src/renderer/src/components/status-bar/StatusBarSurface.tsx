@@ -20,6 +20,7 @@ import { UsagePercentageDisplayChangeNotice } from './UsagePercentageDisplayChan
 import { UpdateStatusSegment } from './UpdateStatusSegment'
 import { SkillUpdateStatusSegment } from './SkillUpdateStatusSegment'
 import { CaffeinateStatusSegment } from './CaffeinateStatusSegment'
+import { LanguageServerStatusSegment } from './LanguageServerStatusSegment'
 import { RemoteServerUpdateStatusSegment } from './RemoteServerUpdateStatusSegment'
 import { TOGGLE_FLOATING_TERMINAL_EVENT } from '@/lib/floating-terminal'
 import { FloatingTerminalIconContextMenu } from '@/components/floating-terminal/FloatingTerminalIconContextMenu'
@@ -243,6 +244,7 @@ export function StatusBarSurface({
       <div className="flex-1" />
 
       <div className="flex items-center gap-3">
+        {!isPairedWebClientWindow() ? <LanguageServerStatusSegment iconOnly={iconOnly} /> : null}
         {!isPairedWebClientWindow() ? <CaffeinateStatusSegment iconOnly={iconOnly} /> : null}
         <RemoteServerUpdateStatusSegment iconOnly={iconOnly} />
         <SkillUpdateStatusSegment iconOnly={iconOnly} />

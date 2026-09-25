@@ -29,9 +29,9 @@ export function directoryChoiceFromValue(value: string): TestEnvironmentDirector
 }
 
 /**
- * Pickable directories for one test env repo: its Orca workspaces, plus a new
- * workspace from the default base. Defaults to the current workspace for its
- * own repo, otherwise the workspace on the same branch, then the main checkout.
+ * Pickable directories for one test env repo: its Orca worktrees (never the
+ * main checkout), plus a new worktree from the default base. Defaults to the
+ * current workspace for its own repo and to a new worktree for the others.
  */
 export function resolveTestEnvironmentRepoDirectories(args: {
   repoId: string
@@ -41,7 +41,6 @@ export function resolveTestEnvironmentRepoDirectories(args: {
   worktrees: readonly Worktree[] | undefined
 }): TestEnvironmentRepoDirectories {
   const { repoId, repo, currentWorktree, currentRepo, worktrees } = args
-  const newWorkspaceBase = (repo?.worktreeBaseRef ?? 'main').replace(/^origin\//, '')
   if (!repo) {
     return {
       options: [],
@@ -63,36 +62,34 @@ export function resolveTestEnvironmentRepoDirectories(args: {
       )
     }
   }
-  const live = (worktrees ?? []).filter((worktree) => !worktree.isArchived && !worktree.isBare)
-  if (repoId === currentWorktree.repoId && !live.some((w) => w.path === currentWorktree.path)) {
+  const isCurrentRepo = repoId === currentWorktree.repoId
+  // Why: a test env must never run against the shared main checkout, only a dedicated worktree.
+  const live = (worktrees ?? []).filter(
+    (worktree) =>
+      !worktree.isArchived &&
+      !worktree.isBare &&
+      !worktree.isMainWorktree &&
+      worktree.path !== repo.path &&
+      worktree.path !== currentWorktree.path
+  )
+  if (isCurrentRepo) {
     live.unshift(currentWorktree)
   }
   const options: TestEnvironmentDirectoryOption[] = live.map((worktree) => ({
     value: worktree.path,
     label: worktree.displayName || branchName(worktree.branch) || worktree.path
   }))
-  if (!options.some((option) => option.value === repo.path)) {
-    options.push({ value: repo.path, label: repo.displayName })
-  }
   options.push({
     value: NEW_WORKSPACE_OPTION_VALUE,
     label: translate(
-      'auto.lib.testEnvironmentDirectories.newWorkspace',
-      'New workspace from {{value0}}',
-      { value0: newWorkspaceBase }
+      'auto.lib.testEnvironmentDirectories.newWorktree',
+      'New worktree from {{value0}}',
+      { value0: repo.worktreeBaseRef || 'origin/main' }
     )
   })
-
-  let defaultPath: string
-  if (repoId === currentWorktree.repoId) {
-    defaultPath = currentWorktree.path
-  } else {
-    const currentBranch = branchName(currentWorktree.branch)
-    const sameBranch = currentBranch
-      ? live.find((worktree) => branchName(worktree.branch) === currentBranch)
-      : undefined
-    const main = live.find((worktree) => worktree.isMainWorktree)
-    defaultPath = sameBranch?.path ?? main?.path ?? repo.path
+  return {
+    options,
+    defaultValue: isCurrentRepo ? currentWorktree.path : NEW_WORKSPACE_OPTION_VALUE,
+    unavailableReason: null
   }
-  return { options, defaultValue: defaultPath, unavailableReason: null }
 }

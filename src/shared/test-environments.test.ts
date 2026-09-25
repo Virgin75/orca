@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
   DEFAULT_TEST_ENVIRONMENT_COLOR,
-  TEST_ENVIRONMENT_PUBLIC_URL_ENV,
-  TEST_ENVIRONMENT_SCRIPT_ENV,
-  buildTestEnvironmentSetupEnv,
   normalizeTestEnvironments,
   renderTestEnvironmentTemplate,
   validateTestEnvironment
@@ -58,6 +55,14 @@ describe('normalizeTestEnvironments', () => {
     expect(envs.map((env) => env.id)).toEqual(['a', 'b'])
   })
 
+  it('keeps dependsOn and readyPort only when set', () => {
+    const env = makeEnv()
+    env.repos[0].setups[0] = { ...env.repos[0].setups[0], dependsOn: ' x ', readyPort: '' }
+    const [normalized] = normalizeTestEnvironments([env])
+    expect(normalized.repos[0].setups[0].dependsOn).toBe('x')
+    expect('readyPort' in normalized.repos[0].setups[0]).toBe(false)
+  })
+
   it('round-trips a valid environment unchanged', () => {
     const env = makeEnv()
     expect(normalizeTestEnvironments([env])).toEqual([env])
@@ -73,6 +78,31 @@ describe('renderTestEnvironmentTemplate', () => {
 })
 
 describe('validateTestEnvironment', () => {
+  it('rejects dependency cycles, missing dependencies and unknown ready ports', () => {
+    const env = makeEnv()
+    const setup = env.repos[0].setups[0]
+    env.repos[0].setups = [
+      { ...setup, id: 'a', name: 'A', dependsOn: 'b', readyPort: 'NOPE' },
+      { ...setup, id: 'b', name: 'B', dependsOn: 'a' },
+      { ...setup, id: 'c', name: 'C', dependsOn: 'gone' }
+    ]
+    const messages = validateTestEnvironment(env).map((issue) => issue.message)
+    expect(messages).toContain('"A" is ready on unknown port "NOPE".')
+    expect(messages).toContain('"A" is part of a dependency cycle.')
+    expect(messages).toContain('"B" is part of a dependency cycle.')
+    expect(messages).toContain('"C" depends on a setup that no longer exists.')
+  })
+
+  it('accepts a dependency with a known ready port', () => {
+    const env = makeEnv()
+    const setup = env.repos[0].setups[0]
+    env.repos[0].setups = [
+      { ...setup, id: 'api', name: 'API', readyPort: 'API_PORT' },
+      { ...setup, id: 'worker', name: 'Worker', dependsOn: 'api' }
+    ]
+    expect(validateTestEnvironment(env)).toEqual([])
+  })
+
   it('accepts a complete environment', () => {
     expect(validateTestEnvironment(makeEnv())).toEqual([])
   })
@@ -89,23 +119,5 @@ describe('validateTestEnvironment', () => {
     expect(messages).toContain('Port name "bad-name" must be letters, digits or underscores.')
     expect(messages).toContain('Add at least one setup.')
     expect(messages).toContain('Unknown port "{{APP_PORT}}" in public URL.')
-  })
-})
-
-describe('buildTestEnvironmentSetupEnv', () => {
-  it('exports ports, the public URL, rendered vars and the script', () => {
-    const setup = makeEnv().repos[0].setups[0]
-    const env = buildTestEnvironmentSetupEnv({
-      setup,
-      ports: { API_PORT: 4001, APP_PORT: 4002 },
-      publicUrl: 'http://localhost:4002'
-    })
-    expect(env).toEqual({
-      API_PORT: '4001',
-      APP_PORT: '4002',
-      [TEST_ENVIRONMENT_PUBLIC_URL_ENV]: 'http://localhost:4002',
-      API_URL: 'http://localhost:4001',
-      [TEST_ENVIRONMENT_SCRIPT_ENV]: 'make run'
-    })
   })
 })

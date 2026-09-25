@@ -39,6 +39,13 @@ export function TestEnvironmentEditorDialog({
   const [draft, setDraft] = useState<TestEnvironment>(initial)
   const [showIssues, setShowIssues] = useState(false)
   const issues = validateTestEnvironment(draft)
+  const repoNameById = new Map(repos.map((repo) => [repo.id, repo.displayName]))
+  const setupOptions = draft.repos.flatMap((entry) =>
+    entry.setups.map((setup) => ({
+      id: setup.id,
+      label: `${repoNameById.get(entry.repoId) ?? '?'} · ${setup.name || '…'}`
+    }))
+  )
   const patch = (updates: Partial<TestEnvironment>): void =>
     setDraft((current) => ({ ...current, ...updates }))
   const updateRepo = (next: TestEnvironmentRepo): void =>
@@ -164,6 +171,8 @@ export function TestEnvironmentEditorDialog({
                 value={repo}
                 repos={repos}
                 usedRepoIds={draft.repos.map((candidate) => candidate.repoId)}
+                setupOptions={setupOptions}
+                portNames={draft.ports.map((port) => port.name)}
                 onChange={updateRepo}
                 onRemove={() =>
                   patch({ repos: draft.repos.filter((candidate) => candidate.id !== repo.id) })

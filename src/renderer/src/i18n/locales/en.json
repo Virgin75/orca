@@ -1008,7 +1008,7 @@
       "testEnvironmentDirectories": {
         "repoRemoved": "Repository was removed.",
         "otherHost": "Lives on a different host than this workspace.",
-        "newWorkspace": "New workspace from {{value0}}"
+        "newWorktree": "New worktree from {{value0}}"
       }
     },
     "hooks": {
@@ -4082,6 +4082,24 @@
             "contact_note": "The host may still be running; only the Orca connection is unavailable.",
             "last_connected": "Last connected {{value0}}",
             "reconnect_attempt": "Attempt {{value0}}"
+          },
+          "LanguageServerStatusSegment": {
+            "starting": "Starting",
+            "indexing": "Indexing",
+            "ready": "Ready",
+            "error": "Error",
+            "remote": "Remote",
+            "idle": "Idle",
+            "pyright": "Pyright (Python)",
+            "typescript": "TypeScript (TS/JS)",
+            "title": "Language servers",
+            "label": "LSP",
+            "remoteDescription": "Remote workspace: go to definition stays within the open file.",
+            "idleDescription": "No Python or TypeScript project detected in this workspace.",
+            "otherWorkspaces": "{{count}} more running for other workspaces",
+            "restart": "Restart language servers",
+            "pythonEnvironment": "Virtualenv: {{environment}}",
+            "noPythonEnvironment": "No virtualenv found; installed packages are not resolved"
           }
         }
       },
@@ -12069,7 +12087,11 @@
           "keywordEnvironment": "environment",
           "keywordPorts": "ports",
           "keywordSetup": "setup",
-          "keywordStack": "stack"
+          "keywordStack": "stack",
+          "dependsOn": "Depends on",
+          "noDependency": "Nothing",
+          "readyPort": "Ready when this port is open",
+          "readyOnLaunch": "As soon as its script starts"
         }
       },
       "right": {
@@ -17221,7 +17243,19 @@
         "restart": "Restart",
         "stop": "Stop",
         "ports": "Ports",
-        "copyPort": "Copy port"
+        "copyPort": "Copy port",
+        "customLaunchTitle": "Launch {{value0}} with custom variables",
+        "customLaunchDescription": "Changes apply to this launch only; the test env in Settings stays as it is. Ports can be referenced as {{value0}}.",
+        "worktrees": "Worktrees",
+        "publicUrl": "Public URL",
+        "envVarName": "Variable name",
+        "envVarValue": "Value of {{value0}}",
+        "removeVariable": "Remove variable",
+        "resetVariable": "Reset to the saved value",
+        "addVariable": "Add variable",
+        "cancel": "Cancel",
+        "moreLaunchOptions": "More launch options",
+        "launchWithCustomEnv": "Launch with custom env variables…"
       }
     },
     "i18n": {

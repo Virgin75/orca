@@ -95,15 +95,18 @@ export default function TestEnvironmentPanel({
 
   const launch = async (
     env: TestEnvironment,
-    directories: Record<string, TestEnvironmentDirectoryChoice>
-  ) => {
+    directories: Record<string, TestEnvironmentDirectoryChoice>,
+    isCustom = false
+  ): Promise<boolean> => {
     try {
-      await launchTestEnvironment({ env, worktreeId, directories })
+      await launchTestEnvironment({ env, worktreeId, directories, isCustom })
+      return true
     } catch (error) {
       toast.error(
         translate('auto.components.testEnvironments.launchFailed', 'Could not launch test env'),
         { description: errorMessage(error) }
       )
+      return false
     }
   }
 
@@ -125,7 +128,9 @@ export default function TestEnvironmentPanel({
     if (!run) {
       return
     }
-    const env = (testEnvironments ?? []).find((candidate) => candidate.id === run.envId)
+    // Why: a custom launch restarts with its one-off values, not the saved test env.
+    const env =
+      run.customEnv ?? (testEnvironments ?? []).find((candidate) => candidate.id === run.envId)
     if (!env) {
       toast.error(
         translate(
@@ -142,7 +147,7 @@ export default function TestEnvironmentPanel({
         directories[entry.id] = { kind: 'path', path: pane.cwd }
       }
     }
-    void launch(env, directories)
+    void launch(env, directories, Boolean(run.customEnv))
   }
 
   return (
@@ -200,7 +205,9 @@ export default function TestEnvironmentPanel({
               key={env.id}
               env={env}
               rows={rowsFor(env)}
-              onLaunch={(directories) => launch(env, directories)}
+              onLaunch={(directories, customEnv) =>
+                launch(customEnv ?? env, directories, Boolean(customEnv))
+              }
             />
           ))}
         </div>
