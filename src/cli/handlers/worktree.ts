@@ -8,6 +8,7 @@ import type {
 import type { CommandHandler } from '../dispatch'
 import { printHookWarning, printPreservedBranchWarning } from './worktree-removal-warnings'
 import { formatWorktreeList, formatWorktreePs, formatWorktreeShow, printResult } from '../format'
+import type { WorktreeShowResult } from '../workspace-format'
 import {
   annotateOmittedHostScope,
   type WithAnnotatedHostScope
@@ -171,13 +172,13 @@ export const WORKTREE_HANDLERS: Record<string, CommandHandler> = {
     printResult(result, json, formatWorktreeList)
   },
   'worktree show': async ({ flags, client, cwd, json }) => {
-    const result = await client.call<{ worktree: RuntimeWorktreeRecord }>('worktree.show', {
+    const result = await client.call<WorktreeShowResult>('worktree.show', {
       worktree: await getRequiredWorktreeSelector(flags, 'worktree', cwd, client)
     })
     printResult(result, json, formatWorktreeShow)
   },
   'worktree current': async ({ client, cwd, json }) => {
-    const result = await client.call<{ worktree: RuntimeWorktreeRecord }>('worktree.show', {
+    const result = await client.call<WorktreeShowResult>('worktree.show', {
       worktree: await resolveCurrentWorktreeSelector(cwd, client)
     })
     printResult(result, json, formatWorktreeShow)

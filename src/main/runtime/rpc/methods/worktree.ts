@@ -23,6 +23,8 @@ import {
   WorktreeTeardownMissingTerminalsParams
 } from './worktree-schemas'
 import { WORKTREE_CATALOG_METHODS } from './worktree-catalog-methods'
+import { getNotionWorkspaceLinks } from '../../../notion/notion-workspace-links'
+import { getTestEnvironmentRun } from '../../../test-environments/test-environment-run-registry'
 
 export const WORKTREE_METHODS = [
   ...WORKTREE_CATALOG_METHODS,
@@ -47,9 +49,15 @@ export const WORKTREE_METHODS = [
   defineMethod({
     name: 'worktree.show',
     params: WorktreeSelector,
-    handler: async (params, { runtime }) => ({
-      worktree: await runtime.showManagedWorktree(params.worktree)
-    })
+    handler: async (params, { runtime }) => {
+      const worktree = await runtime.showManagedWorktree(params.worktree)
+      // Why: new optional siblings keep `worktree` byte-identical for older clients.
+      return {
+        worktree,
+        notionTickets: getNotionWorkspaceLinks(worktree.id),
+        testEnvironment: getTestEnvironmentRun(worktree.id)
+      }
+    }
   }),
   defineMethod({
     name: 'worktree.sleep',

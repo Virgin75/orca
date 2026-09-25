@@ -36,3 +36,14 @@ export type TestEnvironment = {
   /** May reference ports as `{{NAME}}`. */
   publicUrl: string
 }
+
+/** What the desktop tells the runtime about a test env started in a workspace. */
+export type TestEnvironmentRunSummary = {
+  envId: string
+  envName: string
+  worktreeId: string
+  ports: Record<string, number>
+  publicUrl: string
+  startedAt: number
+  setups: { setupName: string; repoName: string; cwd: string }[]
+}

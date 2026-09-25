@@ -74,7 +74,10 @@ export const CORE_COMMAND_SPECS: CommandSpec[] = [
     path: ['worktree', 'show'],
     summary: 'Show one worktree',
     usage: 'orca worktree show --worktree <selector> [--json]',
-    allowedFlags: [...GLOBAL_FLAGS, 'worktree']
+    allowedFlags: [...GLOBAL_FLAGS, 'worktree'],
+    notes: [
+      'Also reports the linked pull request, linked Notion tickets (id, title, url), and the test environment running in the workspace.'
+    ]
   },
   {
     path: ['worktree', 'current'],

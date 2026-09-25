@@ -7,6 +7,8 @@ import type {
   RuntimeWorktreeRecord
 } from '../shared/runtime-types'
 import type { MemorySnapshot, WorktreeMemory } from '../shared/process-stats-types'
+import type { NotionLinkedTicket } from '../shared/notion-types'
+import type { TestEnvironmentRunSummary } from '../shared/test-environment-types'
 import { formatListingHostScope, type WithAnnotatedHostScope } from './omitted-host-scope-selectors'
 
 export function formatMemorySnapshot(snapshot: MemorySnapshot): string {
@@ -190,12 +192,54 @@ export function formatWorktreeList(
     : bodyWithScope
 }
 
-export function formatWorktreeShow(result: { worktree: RuntimeWorktreeRecord }): string {
+export type WorktreeShowResult = {
+  worktree: RuntimeWorktreeRecord
+  // Why: optional because older runtimes and other commands reusing this formatter omit them.
+  notionTickets?: NotionLinkedTicket[]
+  testEnvironment?: TestEnvironmentRunSummary | null
+}
+
+function formatLinkedReview(worktree: RuntimeWorktreeRecord): string {
+  const reviews: [string, number | null | undefined][] = [
+    ['GitHub PR #', worktree.linkedPR],
+    ['GitLab MR !', worktree.linkedGitLabMR],
+    ['Bitbucket PR #', worktree.linkedBitbucketPR],
+    ['Azure DevOps PR #', worktree.linkedAzureDevOpsPR],
+    ['Gitea PR #', worktree.linkedGiteaPR]
+  ]
+  const linked = reviews.flatMap(([label, id]) => (id == null ? [] : [`${label}${id}`]))
+  return linked.length > 0 ? linked.join(', ') : 'none'
+}
+
+function formatTestEnvironment(run: TestEnvironmentRunSummary): string[] {
+  const ports = Object.entries(run.ports).map(([name, port]) => `${name}=${port}`)
+  return [
+    `  name: ${run.envName} (${run.envId})`,
+    `  startedAt: ${new Date(run.startedAt).toISOString()}`,
+    `  publicUrl: ${run.publicUrl || 'none'}`,
+    `  ports: ${ports.length > 0 ? ports.join(', ') : 'none'}`,
+    ...run.setups.map((setup) => `  setup: ${setup.setupName} (${setup.repoName}) ${setup.cwd}`)
+  ]
+}
+
+export function formatWorktreeShow(result: WorktreeShowResult): string {
   const worktree = result.worktree
-  return Object.entries(worktree)
-    .map(
-      ([key, value]) =>
-        `${key}: ${typeof value === 'object' ? JSON.stringify(value) : String(value)}`
-    )
-    .join('\n')
+  const lines = Object.entries(worktree).map(
+    ([key, value]) => `${key}: ${typeof value === 'object' ? JSON.stringify(value) : String(value)}`
+  )
+  lines.push(`pullRequest: ${formatLinkedReview(worktree)}`)
+  if (result.notionTickets !== undefined) {
+    lines.push(result.notionTickets.length === 0 ? 'notionTickets: none' : 'notionTickets:')
+    for (const ticket of result.notionTickets) {
+      lines.push(`  - ${ticket.title} (${ticket.id}) ${ticket.url}`)
+    }
+  }
+  if (result.testEnvironment !== undefined) {
+    if (result.testEnvironment === null) {
+      lines.push('testEnvironment: none')
+    } else {
+      lines.push('testEnvironment:', ...formatTestEnvironment(result.testEnvironment))
+    }
+  }
+  return lines.join('\n')
 }

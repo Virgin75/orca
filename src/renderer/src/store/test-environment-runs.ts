@@ -1,6 +1,9 @@
 import { create } from 'zustand'
 import type { TestEnvironmentPortValues } from '../../../shared/test-environments'
-import type { TestEnvironment } from '../../../shared/test-environment-types'
+import type {
+  TestEnvironment,
+  TestEnvironmentRunSummary
+} from '../../../shared/test-environment-types'
 
 export type TestEnvironmentRunPane = {
   leafId: string
@@ -67,12 +70,43 @@ function persistRuns(runs: Record<string, TestEnvironmentRun>): void {
   }
 }
 
+function toRunSummary(run: TestEnvironmentRun): TestEnvironmentRunSummary {
+  return {
+    envId: run.envId,
+    envName: run.envName,
+    worktreeId: run.worktreeId,
+    ports: run.ports,
+    publicUrl: run.publicUrl,
+    startedAt: run.startedAt,
+    setups: run.panes.map(({ setupName, repoName, cwd }) => ({ setupName, repoName, cwd }))
+  }
+}
+
+// Why: main can't read renderer storage, and `orca worktree show` reports the run from there.
+function publishRuns(runs: Record<string, TestEnvironmentRun>): void {
+  try {
+    window.api.testEnvironments.syncRuns(Object.values(runs).map(toRunSummary))
+  } catch {
+    // No preload bridge (tests, web client): the CLI simply won't see the run.
+  }
+}
+
+function initialRuns(): Record<string, TestEnvironmentRun> {
+  if (typeof window === 'undefined') {
+    return {}
+  }
+  const runs = readPersistedRuns()
+  publishRuns(runs)
+  return runs
+}
+
 export const useTestEnvironmentRunsStore = create<TestEnvironmentRunsState>((set, get) => ({
-  runsByWorktree: typeof window === 'undefined' ? {} : readPersistedRuns(),
+  runsByWorktree: initialRuns(),
   setRun: (run) => {
     const next = { ...get().runsByWorktree, [run.worktreeId]: run }
     set({ runsByWorktree: next })
     persistRuns(next)
+    publishRuns(next)
   },
   clearRun: (worktreeId) => {
     if (!get().runsByWorktree[worktreeId]) {
@@ -82,5 +116,6 @@ export const useTestEnvironmentRunsStore = create<TestEnvironmentRunsState>((set
     delete next[worktreeId]
     set({ runsByWorktree: next })
     persistRuns(next)
+    publishRuns(next)
   }
 }))
