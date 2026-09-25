@@ -24,3 +24,18 @@ export function getChecksPillTone(item: ChecksPillItem): string {
   }
   return 'border-border/60 bg-background/70 text-muted-foreground'
 }
+
+/** Text-only tone for checks shown inline (no pill), built on the status tokens. */
+export function getChecksTextTone(item: ChecksPillItem): string {
+  const state = item.checksSummary?.state
+  if (state === 'success') {
+    return 'text-status-success'
+  }
+  if (state === 'failure') {
+    return 'text-destructive'
+  }
+  if (state === 'pending') {
+    return 'text-workspace-status-progress'
+  }
+  return 'text-muted-foreground'
+}

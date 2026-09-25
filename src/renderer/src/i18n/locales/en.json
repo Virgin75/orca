@@ -1004,6 +1004,11 @@
       },
       "clipboardWriteFailure": {
         "tooLarge": "The text is too large to copy."
+      },
+      "testEnvironmentDirectories": {
+        "repoRemoved": "Repository was removed.",
+        "otherHost": "Lives on a different host than this workspace.",
+        "newWorktree": "New worktree from {{value0}}"
       }
     },
     "hooks": {
@@ -1148,7 +1153,9 @@
         "automationsDescription": "Schedule agent work and choose whether Automations appears in the sidebar.",
         "shareSkillsTitle": "Share Skills",
         "shareSkillsDescription": "Share your skills with an unlisted link. Anyone who has it can install them.",
-        "floatingWorkspaceWebDescription": "Global terminal and markdown tabs."
+        "floatingWorkspaceWebDescription": "Global terminal and markdown tabs.",
+        "testEnvironmentsTitle": "Test Environments",
+        "testEnvironmentsDescription": "Multi-repo environments with generated ports, launched from a workspace."
       },
       "useAppMenuPaste": {
         "pasteTooLarge": "Paste is too large."
@@ -4075,6 +4082,24 @@
             "contact_note": "The host may still be running; only the Orca connection is unavailable.",
             "last_connected": "Last connected {{value0}}",
             "reconnect_attempt": "Attempt {{value0}}"
+          },
+          "LanguageServerStatusSegment": {
+            "starting": "Starting",
+            "indexing": "Indexing",
+            "ready": "Ready",
+            "error": "Error",
+            "remote": "Remote",
+            "idle": "Idle",
+            "pyright": "Pyright (Python)",
+            "typescript": "TypeScript (TS/JS)",
+            "title": "Language servers",
+            "label": "LSP",
+            "remoteDescription": "Remote workspace: go to definition stays within the open file.",
+            "idleDescription": "No Python or TypeScript project detected in this workspace.",
+            "otherWorkspaces": "{{count}} more running for other workspaces",
+            "restart": "Restart language servers",
+            "pythonEnvironment": "Virtualenv: {{environment}}",
+            "noPythonEnvironment": "No virtualenv found; installed packages are not resolved"
           }
         }
       },
@@ -5512,7 +5537,8 @@
           "219ebf1961": "Branch name",
           "folderPathIdentity": "Branch / folder path",
           "cli": "Orca CLI",
-          "workspaceOptions": "Workspace options"
+          "workspaceOptions": "Workspace options",
+          "prLabel": "Label"
         },
         "SshTargetRow": {
           "4677394048": "Connecting…",
@@ -5994,7 +6020,9 @@
               "682ed5d551": "Closed",
               "7c2f009786": "In progress",
               "6798dc7c94": "In review",
-              "5076efc3d2": "Done"
+              "5076efc3d2": "Done",
+              "prLabelNoPR": "No PR",
+              "prLabelOther": "Other"
             }
           }
         },
@@ -6369,6 +6397,14 @@
           "architectureMismatch": "A Git-related executable could not run because its CPU architecture is incompatible with this execution host. Install Git and related tools for the host architecture.",
           "copyCommand": "Copy command",
           "copyDiagnostics": "Copy diagnostics"
+        },
+        "SidebarPRLabelGroupsSection": {
+          "none": "None",
+          "count": "{{value0}} labels",
+          "title": "Label groups",
+          "hint": "First checked label wins",
+          "clear": "Clear",
+          "empty": "No PR labels found yet"
         }
       },
       "shared": {
@@ -12012,6 +12048,50 @@
         "TerminalRenderingSection": {
           "6d4c55bacc": "Inline Images",
           "fffab5890b": "Display images directly in the terminal using SIXEL, iTerm2 (IIP), and Kitty graphics protocols."
+        },
+        "testEnvironments": {
+          "editorTitle": "Test environment",
+          "editorDescription": "Reference a generated port as {{value0}} in env values and the public URL. Setup scripts also see each port as {{value1}}.",
+          "name": "Name",
+          "ports": "Random ports",
+          "portsHint": "Each launch picks a free port for every name below.",
+          "removePort": "Remove port",
+          "addPort": "Add port",
+          "publicUrl": "Public URL",
+          "repositories": "Repositories",
+          "addRepo": "Add repository",
+          "cancel": "Cancel",
+          "save": "Save",
+          "pickRepo": "Pick a repository",
+          "removeRepo": "Remove repository",
+          "addSetup": "Add setup",
+          "setupName": "Setup name (e.g. API server, Celery worker)",
+          "removeSetup": "Remove setup",
+          "envVars": "Environment variables",
+          "removeEnvVar": "Remove variable",
+          "addEnvVar": "Add variable",
+          "script": "Setup script (bash, runs after the variables are exported)",
+          "deleteTitle": "Delete \"{{value0}}\"?",
+          "deleteDescription": "Running instances keep their terminals, but you will no longer be able to launch it.",
+          "delete": "Delete",
+          "new": "New test environment",
+          "empty": "No test environments yet. Create one to launch several repositories together from a workspace.",
+          "untitled": "Untitled",
+          "summary": "{{value0}} setups, {{value1}} ports",
+          "edit": "Edit",
+          "title": "Test Environments",
+          "description": "Define environments that span several repositories. Launch them from the Test env panel of a workspace.",
+          "searchTitle": "Test environments",
+          "searchDescription": "Create, edit and delete multi-repo test environments with generated ports and setup scripts.",
+          "keywordTest": "test",
+          "keywordEnvironment": "environment",
+          "keywordPorts": "ports",
+          "keywordSetup": "setup",
+          "keywordStack": "stack",
+          "dependsOn": "Depends on",
+          "noDependency": "Nothing",
+          "readyPort": "Ready when this port is open",
+          "readyOnLaunch": "As soon as its script starts"
         }
       },
       "right": {
@@ -12913,7 +12993,9 @@
             "fc3095d2ed": "explorer",
             "aiVaultSessionHistory": "Agents",
             "folderWorkspaces": "Attached worktrees",
-            "parentPrChecks": "PR Checks"
+            "parentPrChecks": "PR Checks",
+            "notionTickets": "Notion tickets",
+            "testEnvironment": "Test env"
           },
           "right": {
             "panel": {
@@ -17094,6 +17176,86 @@
         "9a4c6b2d7e": "Skill sharing",
         "3d8e5f1b9c": "Share skills behind an unlisted link and install them on any machine you use.",
         "c5b3e8a17d": "Sign in to Orca"
+      },
+      "workspaceHeader": {
+        "addReviewer": "Add reviewer",
+        "editReviewers": "Edit reviewers",
+        "openReview": "Open {{value0}} #{{value1}}",
+        "openChecks": "Show checks",
+        "branch": "Branch",
+        "checksCount": "{{value0}}/{{value1}} checks",
+        "pendingComment": "1 pending comment",
+        "pendingComments": "{{value0}} pending comments",
+        "reviewerNames": "Reviewer: {{value0}}"
+      },
+      "notion": {
+        "addTicket": "Add ticket",
+        "searchTickets": "Search tickets…",
+        "noTickets": "No matching tickets",
+        "searchHint": "Type to search the Tasks database. The first search may open Notion sign-in in your browser.",
+        "selectedCount": "{{value0}} selected",
+        "linkTickets": "Link tickets",
+        "priority": "Priority",
+        "editStatus": "Change status",
+        "openTicket": "Open ticket {{value0}}",
+        "unavailable": "Notion tickets are available in the desktop app.",
+        "empty": "No Notion tickets linked to this workspace yet. Use Add ticket to link some.",
+        "refresh": "Refresh",
+        "openInNotion": "Open in Notion",
+        "unlink": "Unlink from workspace",
+        "noContent": "This ticket has no content.",
+        "comments": "Comments ({{value0}})",
+        "someone": "Notion user",
+        "fromUrl": "From URL",
+        "fromSearch": "From search",
+        "urlPlaceholder": "https://www.notion.so/… ticket URL",
+        "linkTicket": "Link ticket",
+        "postComment": "Comment",
+        "reply": "Reply…",
+        "addComment": "Add comment",
+        "commentOn": "Comment on “{{value0}}”",
+        "addCommentPlaceholder": "Add a comment…",
+        "discussionUnavailable": "This discussion is resolved or no longer available.",
+        "editContent": "Ticket content",
+        "editHint": "Notion-flavored Markdown. Only changed lines are sent to Notion.",
+        "cancelEdit": "Cancel",
+        "saveEdit": "Save",
+        "edit": "Edit",
+        "exitEdit": "Exit edit mode"
+      },
+      "testEnvironments": {
+        "noWorkspace": "Select a workspace first.",
+        "launchFailed": "Could not launch test env",
+        "envRemoved": "This test env no longer exists in Settings.",
+        "title": "Test env",
+        "manage": "Manage test environments",
+        "empty": "No test environment includes this repository yet.",
+        "create": "Create a test env",
+        "launch": "Launch",
+        "statusRunning": "Running",
+        "statusStopped": "Stopped",
+        "statusStarting": "Starting",
+        "copied": "Copied",
+        "openInOrcaBrowser": "Open in Orca browser",
+        "openInSystemBrowser": "Open in system browser",
+        "copyUrl": "Copy URL",
+        "showTerminal": "Show terminal",
+        "restart": "Restart",
+        "stop": "Stop",
+        "ports": "Ports",
+        "copyPort": "Copy port",
+        "customLaunchTitle": "Launch {{value0}} with custom variables",
+        "customLaunchDescription": "Changes apply to this launch only; the test env in Settings stays as it is. Ports can be referenced as {{value0}}.",
+        "worktrees": "Worktrees",
+        "publicUrl": "Public URL",
+        "envVarName": "Variable name",
+        "envVarValue": "Value of {{value0}}",
+        "removeVariable": "Remove variable",
+        "resetVariable": "Reset to the saved value",
+        "addVariable": "Add variable",
+        "cancel": "Cancel",
+        "moreLaunchOptions": "More launch options",
+        "launchWithCustomEnv": "Launch with custom env variables…"
       }
     },
     "i18n": {

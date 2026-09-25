@@ -40,6 +40,7 @@ const SETTINGS_NAV_TARGETS = [
   'orchestration',
   'artifacts',
   'session-history',
+  'test-environments',
   'share-skills',
   'automations',
   'orca-account',

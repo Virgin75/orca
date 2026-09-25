@@ -33,6 +33,7 @@ export type RuntimeClientSettings = Pick<
   | 'visibleTaskProviders'
   | 'defaultRepoSelection'
   | 'defaultLinearTeamSelection'
+  | 'prLabelGroups'
   | 'githubProjects'
   | 'experimentalNewWorktreeCardStyle'
   | 'experimentalNativeChat'
@@ -67,6 +68,7 @@ export type RuntimeClientSettingsUpdate = Pick<
   | 'visibleTaskProviders'
   | 'defaultRepoSelection'
   | 'defaultLinearTeamSelection'
+  | 'prLabelGroups'
   | 'githubProjects'
   | 'experimentalNewWorktreeCardStyle'
   | 'compactWorktreeCards'
@@ -106,6 +108,7 @@ export class RuntimeClientSettingsController {
       visibleTaskProviders: settings.visibleTaskProviders ?? [...TASK_PROVIDERS],
       defaultRepoSelection: settings.defaultRepoSelection ?? null,
       defaultLinearTeamSelection: settings.defaultLinearTeamSelection ?? null,
+      prLabelGroups: settings.prLabelGroups ?? [],
       githubProjects: settings.githubProjects,
       experimentalNewWorktreeCardStyle: settings.experimentalNewWorktreeCardStyle === true,
       // The three that decide whether a new agent tab -- and so an orchestration worker -- is a

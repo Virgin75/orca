@@ -7,7 +7,8 @@ export function normalizeGroupBy(groupBy: unknown): PersistedState['ui']['groupB
     groupBy === 'none' ||
     groupBy === 'workspace-status' ||
     groupBy === 'repo' ||
-    groupBy === 'pr-status'
+    groupBy === 'pr-status' ||
+    groupBy === 'pr-label'
   ) {
     return groupBy
   }
@@ -68,7 +69,9 @@ export function normalizeRightSidebarTab(tab: unknown): PersistedState['ui']['ri
     tab === 'pr-checks' ||
     tab === 'source-control' ||
     tab === 'checks' ||
-    tab === 'ports'
+    tab === 'ports' ||
+    tab === 'notion' ||
+    tab === 'test-env'
   ) {
     return tab
   }

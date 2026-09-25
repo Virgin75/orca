@@ -125,7 +125,7 @@ describe('getPRForBranch', () => {
         '--repo',
         'acme/widgets',
         '--json',
-        'number,title,state,url,statusCheckRollup,updatedAt,isDraft,mergeable,reviewDecision,mergeStateStatus,autoMergeRequest,baseRefName,headRefName,baseRefOid,headRefOid'
+        'number,title,state,url,statusCheckRollup,updatedAt,isDraft,mergeable,reviewDecision,mergeStateStatus,autoMergeRequest,baseRefName,headRefName,baseRefOid,headRefOid,labels'
       ],
       { cwd: '/repo-root' }
     )
@@ -161,7 +161,7 @@ describe('getPRForBranch', () => {
         '--limit',
         '1',
         '--json',
-        'number,title,state,url,statusCheckRollup,updatedAt,isDraft,mergeable,baseRefName,headRefName,baseRefOid,headRefOid'
+        'number,title,state,url,statusCheckRollup,updatedAt,isDraft,mergeable,baseRefName,headRefName,baseRefOid,headRefOid,labels'
       ],
       { cwd: '/repo-root' }
     )
@@ -307,7 +307,7 @@ describe('getPRForBranch', () => {
         '--repo',
         'stablyai/orca',
         '--json',
-        'number,title,state,url,statusCheckRollup,updatedAt,isDraft,mergeable,reviewDecision,mergeStateStatus,autoMergeRequest,baseRefName,headRefName,baseRefOid,headRefOid'
+        'number,title,state,url,statusCheckRollup,updatedAt,isDraft,mergeable,reviewDecision,mergeStateStatus,autoMergeRequest,baseRefName,headRefName,baseRefOid,headRefOid,labels'
       ],
       { cwd: '/repo-root' }
     )
@@ -380,7 +380,7 @@ describe('getPRForBranch', () => {
         '--limit',
         '1',
         '--json',
-        'number,title,state,url,statusCheckRollup,updatedAt,isDraft,mergeable,baseRefName,headRefName,baseRefOid,headRefOid'
+        'number,title,state,url,statusCheckRollup,updatedAt,isDraft,mergeable,baseRefName,headRefName,baseRefOid,headRefOid,labels'
       ],
       { cwd: '/repo-root' }
     )
@@ -506,7 +506,7 @@ describe('getPRForBranch', () => {
         '--repo',
         'acme/widgets',
         '--json',
-        'number,title,state,url,statusCheckRollup,updatedAt,isDraft,mergeable,reviewDecision,mergeStateStatus,autoMergeRequest,baseRefName,headRefName,baseRefOid,headRefOid'
+        'number,title,state,url,statusCheckRollup,updatedAt,isDraft,mergeable,reviewDecision,mergeStateStatus,autoMergeRequest,baseRefName,headRefName,baseRefOid,headRefOid,labels'
       ],
       { cwd: '/repo-root' }
     )

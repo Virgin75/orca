@@ -1,4 +1,5 @@
 import type { ExecutionHostId } from './execution-host'
+import type { TestEnvironment } from './test-environment-types'
 import type { GitHubProjectSettings } from './github/project-types'
 import type { VoiceSettings } from './speech-types'
 import type { AiVaultSearchSettings } from './ai-vault-search-settings'
@@ -235,6 +236,8 @@ export type GlobalSettings = {
   nativeChatSessionOptions?: PersistedNativeChatSessionOptions
   /** Extra launcher rows for the worktree "Open in" submenu. VS Code is always shown first. */
   openInApplications?: OpenInApplication[]
+  /** Multi-repo test environments launched from the right sidebar's Test env panel. */
+  testEnvironments?: TestEnvironment[]
   /** Deprecated: migration/backward-compat only. Use PersistedUIState.rightSidebarOpen. */
   rightSidebarOpenByDefault: boolean
   showGitIgnoredFiles?: boolean
@@ -378,6 +381,8 @@ export type GlobalSettings = {
   /** Persisted Linear team selection (tasks view). Same nullable-array pattern as
    *  defaultRepoSelection: null = sticky-all, string[] = frozen subset of team IDs. */
   defaultLinearTeamSelection: string[] | null
+  /** Sidebar "PR label" grouping lanes in priority order; a PR joins the first listed label it carries. */
+  prLabelGroups?: string[]
   /** Session cookie for OpenCode Go rate-limit fetching. Stored encrypted. */
   opencodeSessionCookie: string
   /** Optional OpenCode Go workspace ID override; when set, skips the workspaces lookup and fetches usage directly. */

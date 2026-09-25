@@ -23,6 +23,8 @@ import { useMonacoEditorDecorations } from './use-monaco-editor-decorations'
 import { useMonacoEditorMount } from './use-monaco-editor-mount'
 import { snapshotMonacoViewState } from './monaco-view-state-persistence'
 import { MonacoMarkdownAnnotationOverlay } from './MonacoMarkdownAnnotationOverlay'
+import { registerDefinitionModelOwner } from './monaco-definition-model-owners'
+import { prepareLanguageServer } from './monaco-language-server-client'
 
 type MonacoEditorProps = {
   fileId: string
@@ -156,6 +158,17 @@ export default function MonacoEditor({
       unregisterFileSearchSelectionRef.current = null
     }
   }, [cancelScheduledReveal, clearTransientRevealHighlight, viewStateKey])
+
+  // Why: go-to-definition resolves cross-file targets through the workspace that owns this model;
+  // warming the language server on open keeps the first Cmd+Click from paying its startup.
+  useEffect(() => {
+    if (!worktreeId) {
+      return
+    }
+    const owner = { worktreeId, filePath }
+    prepareLanguageServer(owner, language, contentRef.current)
+    return registerDefinitionModelOwner(modelUri, owner)
+  }, [modelUri, worktreeId, filePath, language])
 
   // Update editor options when settings change
   useEffect(() => {

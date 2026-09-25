@@ -122,6 +122,8 @@ export type GithubWorkItemApi = {
     repoId?: string
     sourceContext?: TaskSourceContext | null
   }) => Promise<string[]>
+  /** Desktop-only: label name → hex color without `#`. */
+  listLabelColors: (args: { repoPath: string; repoId?: string }) => Promise<Record<string, string>>
   listAssignableUsers: (args: {
     repoPath: string
     repoId?: string

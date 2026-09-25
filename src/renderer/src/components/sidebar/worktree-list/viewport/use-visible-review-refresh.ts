@@ -7,6 +7,7 @@ import type { Worktree } from '../../../../../../shared/worktree/types'
 import type { WorktreeGroupBy } from '../grouping/row-types'
 import type { RenderRow } from '../listing/render-row'
 import type { WorktreeItemRow } from '../listing/renderable-rows'
+import { isPullRequestGroupBy } from '../../../../../../shared/workspace-pr-grouping'
 
 export function installWorktreeVisibleRefreshVisibilityListener(onChange: () => void): () => void {
   document.addEventListener('visibilitychange', onChange)
@@ -72,7 +73,7 @@ export function useVisiblePrRefreshReporting(args: {
         (currentWorktree.linkedPR ?? null) !== null)
     const shouldTrackSidebarWorktree = rightSidebarShowsPR && sidebarWorktreeHasGitHubReview
     const shouldTrackVisibleRows =
-      groupBy === 'pr-status' ||
+      isPullRequestGroupBy(groupBy) ||
       (newCardStyle
         ? cardProps.includes('status')
         : cardProps.includes('pr') || cardProps.includes('ci'))

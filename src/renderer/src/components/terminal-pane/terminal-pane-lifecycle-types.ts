@@ -20,6 +20,7 @@ import type { ReplayingPanesRef } from './replay-guard'
 import type { TerminalLinkActionRequester } from './terminal-link-action-request'
 import type { TerminalLinkRoutingPreferenceRequester } from './terminal-url-link-hit-testing'
 import type { SessionRestoredBannerReason } from './session-restored-banner-pane-state'
+import type { TerminalCommandSplitGrid } from '@/lib/terminal-command-split-queue'
 
 export type TerminalPaneStartup = Exclude<PtyPaneStartup, null>
 
@@ -43,6 +44,8 @@ export type UseTerminalPaneLifecycleDeps = {
   setupSplit?: TerminalPaneSetupSplit | null
   /** Split pane runs the repo's issue-automation command with the issue number interpolated. */
   issueCommandSplit?: TerminalPaneIssueCommandSplit | null
+  /** Grid of command panes (e.g. a test environment's setups) created once on mount. */
+  commandSplits?: TerminalCommandSplitGrid | null
   isActive: boolean
   isVisible: boolean
   systemPrefersDark: boolean

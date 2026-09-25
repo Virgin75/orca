@@ -12,7 +12,7 @@ export type MobileSortMode = 'smart' | 'name' | 'recent' | 'repo' | 'manual'
 
 // Desktop PersistedUIState fields this screen syncs (a structural subset).
 export type WorkspaceViewSettings = {
-  groupBy?: 'none' | 'workspace-status' | 'repo' | 'pr-status'
+  groupBy?: 'none' | 'workspace-status' | 'repo' | 'pr-status' | 'pr-label'
   sortBy?: 'name' | 'smart' | 'recent' | 'repo' | 'manual'
   hideSleepingWorkspaces?: boolean
   hideDefaultBranchWorkspace?: boolean
@@ -29,7 +29,10 @@ const GROUP_TO_DESKTOP: Record<MobileGroupMode, NonNullable<WorkspaceViewSetting
   prStatus: 'pr-status'
 }
 
-const GROUP_FROM_DESKTOP: Record<NonNullable<WorkspaceViewSettings['groupBy']>, MobileGroupMode> = {
+// Why Partial: desktop-only modes (pr-label) leave the phone on its current grouping.
+const GROUP_FROM_DESKTOP: Partial<
+  Record<NonNullable<WorkspaceViewSettings['groupBy']>, MobileGroupMode>
+> = {
   none: 'none',
   'workspace-status': 'workspaceStatus',
   repo: 'repo',

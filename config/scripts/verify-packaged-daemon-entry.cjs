@@ -30,17 +30,47 @@ function assertPackagedDaemonEntryExists(resourcesDir) {
 //
 // resourcesDir is the packaged Resources dir (Contents/Resources on macOS,
 // <appOutDir>/resources elsewhere). execPath defaults to the packaging Node.
+//
+// Why 60s (was 10s): the entry dlopens node-pty's freshly written pty.node, and
+// macOS scans every new Mach-O on first load. Mid-build, with the machine busy
+// copying/zipping the bundle, that first load overran 10s on every local build
+// of an Intel Mac even though the same file booted in 0.3s moments later.
+const DEFAULT_BOOT_TIMEOUT_MS = 60_000
+
+function resolveBootTimeoutMs(options) {
+  if (Number.isFinite(options.timeoutMs) && options.timeoutMs > 0) {
+    return options.timeoutMs
+  }
+  const fromEnv = Number(process.env.ORCA_DAEMON_ENTRY_BOOT_TIMEOUT_MS)
+  return Number.isFinite(fromEnv) && fromEnv > 0 ? fromEnv : DEFAULT_BOOT_TIMEOUT_MS
+}
+
 function verifyPackagedDaemonEntryBoots(resourcesDir, options = {}) {
   const execPath = options.execPath || process.execPath
   const entryPath = assertPackagedDaemonEntryExists(resourcesDir)
+  const timeoutMs = resolveBootTimeoutMs(options)
 
-  const result = spawnSync(execPath, [entryPath], { encoding: 'utf8', timeout: 10_000 })
+  const result = spawnSync(execPath, [entryPath], { encoding: 'utf8', timeout: timeoutMs })
+  const stderr = result.stderr || ''
   if (result.error) {
+    // Why: the usage line proves the module graph loaded — the only thing this
+    // gate checks — so a process that printed it but was slow to exit passes.
+    if (result.error.code === 'ETIMEDOUT' && stderr.includes('Usage: daemon-entry')) {
+      console.warn(
+        `[verify-packaged-daemon-entry] OK (slow exit) — daemon-entry reached argv parsing but ` +
+          `did not exit within ${timeoutMs}ms`
+      )
+      return
+    }
+    const timeoutHint =
+      result.error.code === 'ETIMEDOUT'
+        ? ` (no usage line within ${timeoutMs}ms; raise ORCA_DAEMON_ENTRY_BOOT_TIMEOUT_MS if the ` +
+          `machine is under heavy load). stderr so far:\n${stderr || '(empty)'}`
+        : ''
     throw new Error(
-      `[verify-packaged-daemon-entry] could not launch daemon-entry.js: ${result.error.message}`
+      `[verify-packaged-daemon-entry] could not launch daemon-entry.js: ${result.error.message}${timeoutHint}`
     )
   }
-  const stderr = result.stderr || ''
   if (/Cannot find module|MODULE_NOT_FOUND/.test(stderr)) {
     throw new Error(
       `[verify-packaged-daemon-entry] packaged daemon-entry.js failed to load under plain Node:\n${stderr}`

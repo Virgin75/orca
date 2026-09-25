@@ -28,6 +28,9 @@ import { ghApi } from './api/gh-bridge'
 import { hostedReviewApi } from './api/hosted-review-bridge'
 import { glApiBridge } from './api/gl-bridge'
 import { bitbucketApi } from './api/bitbucket-bridge'
+import { notionApi } from './api/notion-bridge'
+import { testEnvironmentsApi } from './api/test-environments-bridge'
+import { languageServersApi } from './api/language-servers-bridge'
 import { linearApi } from './api/linear-bridge'
 import { jiraApi } from './api/jira-bridge'
 import { starNagApi } from './api/star-nag-bridge'
@@ -124,6 +127,9 @@ const api = {
   bitbucket: bitbucketApi,
   linear: linearApi,
   jira: jiraApi,
+  notion: notionApi,
+  testEnvironments: testEnvironmentsApi,
+  languageServers: languageServersApi,
   starNag: starNagApi,
   telemetryTrack: telemetryTrackApi,
   telemetrySetOptIn: telemetrySetOptInApi,

@@ -7,6 +7,7 @@ import { MobileSettingsPane } from './MobileSettingsPane'
 import { OrcaAccountSettingsPane } from './OrcaAccountSettingsPane'
 import { SettingsSetupGuidePane } from './SettingsSetupGuidePane'
 import { ShareSkillsSettingsPane } from './ShareSkillsSettingsPane'
+import { TestEnvironmentsSettingsPane } from './TestEnvironmentsSettingsPane'
 import { SettingsSection } from './SettingsSection'
 import { translate } from '@/i18n/i18n'
 import type { SettingsRenderContext } from './settings-render-context'
@@ -196,6 +197,31 @@ export function renderSessionHistorySettingsSection(
         <SessionHistorySettingsPane
           settings={model.settings}
           updateSettings={model.updateSettingsOrThrow}
+        />
+      ) : null}
+    </SettingsSection>
+  )
+}
+
+export function renderTestEnvironmentsSettingsSection(
+  context: SettingsRenderContext
+): React.JSX.Element {
+  const { model, navigation, view } = context
+  return (
+    <SettingsSection
+      id="test-environments"
+      title={translate('auto.components.settings.testEnvironments.title', 'Test Environments')}
+      description={translate(
+        'auto.components.settings.testEnvironments.description',
+        'Define environments that span several repositories. Launch them from the Test env panel of a workspace.'
+      )}
+      searchEntries={navigation.getSectionSearchEntries('test-environments')}
+    >
+      {view.isSectionMounted('test-environments') ? (
+        <TestEnvironmentsSettingsPane
+          settings={model.settings}
+          updateSettings={model.updateSettings}
+          repos={model.repos}
         />
       ) : null}
     </SettingsSection>

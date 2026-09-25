@@ -12,6 +12,7 @@ import { normalizeDesktopTerminalScrollbackRows } from '../../../shared/terminal
 import { normalizeTerminalMinimumContrastRatio } from '../../../shared/terminal-minimum-contrast-settings'
 import { normalizeTaskProviderSettings } from '../../../shared/task-providers'
 import { normalizeOpenInApplications } from '../../../shared/open-in-applications'
+import { normalizeTestEnvironments } from '../../../shared/test-environments'
 import { normalizeTerminalShortcutPolicy } from '../../../shared/keybindings'
 import { normalizeSourceControlGroupOrder } from '../../../shared/source-control-group-order'
 import { normalizeAppIconId } from '../../../shared/app-icon'
@@ -159,6 +160,9 @@ export function updateSettings(
   }
   if ('openInApplications' in updates) {
     sanitizedUpdates.openInApplications = normalizeOpenInApplications(updates.openInApplications)
+  }
+  if ('testEnvironments' in updates) {
+    sanitizedUpdates.testEnvironments = normalizeTestEnvironments(updates.testEnvironments)
   }
   if ('terminalShortcutPolicy' in updates) {
     sanitizedUpdates.terminalShortcutPolicy = normalizeTerminalShortcutPolicy(

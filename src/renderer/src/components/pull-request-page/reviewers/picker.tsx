@@ -6,27 +6,7 @@ import { translate } from '@/i18n/i18n'
 import type { GitHubAssignableUser } from '../../../../../shared/github/pull-request-types'
 import { ReviewerPickerRow } from './picker-row'
 
-export function ReviewerPicker({
-  open,
-  submitting,
-  canRequestReview,
-  reviewerInput,
-  reviewerInputRef,
-  reviewerMetadataLoading,
-  reviewerMetadataError,
-  hasReviewerMetadata,
-  filteredReviewerCandidates,
-  suggestedReviewerRows,
-  everyoneElseReviewerRows,
-  actionableReviewerRows,
-  activeReviewerIndex,
-  selectedReviewerLogins,
-  onOpenChange,
-  onInputChange,
-  onActiveIndexChange,
-  onEnter,
-  onRequestReviewer
-}: {
+export type ReviewerPickerStateProps = {
   open: boolean
   submitting: boolean
   canRequestReview: boolean
@@ -46,6 +26,34 @@ export function ReviewerPicker({
   onActiveIndexChange: (nextIndex: number | ((current: number) => number)) => void
   onEnter: () => void
   onRequestReviewer: (reviewer: GitHubAssignableUser) => void
+}
+
+export function ReviewerPicker({
+  open,
+  submitting,
+  canRequestReview,
+  reviewerInput,
+  reviewerInputRef,
+  reviewerMetadataLoading,
+  reviewerMetadataError,
+  hasReviewerMetadata,
+  filteredReviewerCandidates,
+  suggestedReviewerRows,
+  everyoneElseReviewerRows,
+  actionableReviewerRows,
+  activeReviewerIndex,
+  selectedReviewerLogins,
+  onOpenChange,
+  onInputChange,
+  onActiveIndexChange,
+  onEnter,
+  onRequestReviewer,
+  trigger,
+  align = 'end'
+}: ReviewerPickerStateProps & {
+  /** Replaces the default pencil button; must forward refs (PopoverTrigger asChild). */
+  trigger?: React.ReactNode
+  align?: 'start' | 'center' | 'end'
 }): React.JSX.Element {
   const reviewerListId = useId()
   const reviewerRowId = (index: number): string => `${reviewerListId}-${index}`
@@ -53,22 +61,24 @@ export function ReviewerPicker({
   return (
     <Popover open={open} onOpenChange={onOpenChange}>
       <PopoverTrigger asChild>
-        <button
-          type="button"
-          disabled={submitting || !canRequestReview}
-          aria-label={translate('auto.components.PullRequestPage.a04c137bb7', 'Reviewer')}
-          className="rounded p-0.5 text-muted-foreground transition hover:bg-accent hover:text-foreground disabled:opacity-50"
-        >
-          {submitting ? (
-            <LoaderCircle className="size-3 animate-spin" />
-          ) : (
-            <Pencil className="size-3" />
-          )}
-        </button>
+        {trigger ?? (
+          <button
+            type="button"
+            disabled={submitting || !canRequestReview}
+            aria-label={translate('auto.components.PullRequestPage.a04c137bb7', 'Reviewer')}
+            className="rounded p-0.5 text-muted-foreground transition hover:bg-accent hover:text-foreground disabled:opacity-50"
+          >
+            {submitting ? (
+              <LoaderCircle className="size-3 animate-spin" />
+            ) : (
+              <Pencil className="size-3" />
+            )}
+          </button>
+        )}
       </PopoverTrigger>
       <PopoverContent
         className="flex max-h-[420px] w-[330px] flex-col overflow-hidden rounded-md border-border/70 p-0"
-        align="end"
+        align={align}
         side="bottom"
         sideOffset={6}
         onOpenAutoFocus={(event) => {

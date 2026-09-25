@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Plug, Files, GitBranch, ListChecks, Workflow } from 'lucide-react'
+import { Plug, Files, GitBranch, Github, Globe, ListChecks, Workflow } from 'lucide-react'
 import { useAppStore } from '@/store'
 import { useRepoById } from '@/store/selectors'
 import { isFolderRepo } from '../../../../shared/repo-kind'
@@ -15,6 +15,10 @@ import {
 import { useShortcutLabel } from '@/hooks/useShortcutLabel'
 import { translate } from '@/i18n/i18n'
 import { AgentSessionHistoryIcon } from './agent-session-history-icon'
+import { NotionIcon } from '@/components/icons/NotionIcon'
+import { isNotionAvailable } from '@/store/notion-tickets'
+import { useTestEnvironmentRunsStore } from '@/store/test-environment-runs'
+import { testEnvironmentIncludesRepo } from '../../../../shared/test-environments'
 import type { ActivityBarItem } from './activity-bar-buttons'
 
 export type RightSidebarActivityItems = {
@@ -45,6 +49,19 @@ export function useRightSidebarActivityItems({
   const isFolderWorkspace = activeWorkspaceScope?.type === 'folder'
   const isFolder = isFolderWorkspace || (activeRepo ? isFolderRepo(activeRepo) : false)
   const isSshRepo = Boolean(activeRepo?.connectionId)
+  const activeRepoId = activeWorktree?.repoId ?? null
+  // Why: only surface the tab once Settings define a test env this repo takes part in.
+  const hasTestEnvironment = useAppStore((s) =>
+    activeRepoId
+      ? (s.settings?.testEnvironments ?? []).some((env) =>
+          testEnvironmentIncludesRepo(env, activeRepoId)
+        )
+      : false
+  )
+  const hasTestEnvironmentRun = useTestEnvironmentRunsStore((s) =>
+    activeWorktreeId ? Boolean(s.runsByWorktree[activeWorktreeId]) : false
+  )
+  const showTestEnvironment = hasTestEnvironment || hasTestEnvironmentRun
   const pluginSystemEnabled = useAppStore((s) => s.settings?.pluginSystemEnabled === true)
   const pluginPanels = usePluginPanels()
   const visiblePluginPanels = useMemo(
@@ -99,7 +116,7 @@ export function useRightSidebarActivityItems({
       },
       {
         id: 'checks',
-        icon: ListChecks,
+        icon: Github,
         title: translate('auto.components.right.sidebar.index.83a10e3c44', 'Checks'),
         shortcut: checksShortcut === 'Unassigned' ? '' : checksShortcut,
         gitOnly: true
@@ -111,6 +128,29 @@ export function useRightSidebarActivityItems({
         shortcut: portsShortcut === 'Unassigned' ? '' : portsShortcut,
         sshOnly: true
       },
+      ...(isNotionAvailable()
+        ? [
+            {
+              id: 'notion' as const,
+              icon: NotionIcon,
+              title: translate(
+                'auto.components.right.sidebar.index.notionTickets',
+                'Notion tickets'
+              ),
+              shortcut: ''
+            }
+          ]
+        : []),
+      ...(showTestEnvironment
+        ? [
+            {
+              id: 'test-env' as const,
+              icon: Globe,
+              title: translate('auto.components.right.sidebar.index.testEnvironment', 'Test env'),
+              shortcut: ''
+            }
+          ]
+        : []),
       // Why: plugin panels append after the built-in tabs so core navigation
       // keeps stable positions regardless of which plugins are installed.
       ...getPluginPanelActivityItems(visiblePluginPanels, pluginPanelErrors)
@@ -121,6 +161,7 @@ export function useRightSidebarActivityItems({
       pluginPanelErrors,
       visiblePluginPanels,
       portsShortcut,
+      showTestEnvironment,
       sourceControlShortcut
     ]
   )

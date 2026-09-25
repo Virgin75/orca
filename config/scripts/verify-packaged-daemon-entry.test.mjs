@@ -54,4 +54,18 @@ describe('verify-packaged-daemon-entry', () => {
     writePackagedEntry('process.exit(0)\n')
     expect(() => verifyPackagedDaemonEntryBoots(resourcesDir)).toThrow(/did not reach argv parsing/)
   })
+
+  it('passes when the entry reaches argv parsing but is slow to exit', () => {
+    writePackagedEntry(
+      'console.error("Usage: daemon-entry <socket>"); setTimeout(() => {}, 60_000)\n'
+    )
+    expect(() => verifyPackagedDaemonEntryBoots(resourcesDir, { timeoutMs: 1_500 })).not.toThrow()
+  })
+
+  it('fails with the partial output when the entry times out before argv parsing', () => {
+    writePackagedEntry('console.error("still loading"); setTimeout(() => {}, 60_000)\n')
+    expect(() => verifyPackagedDaemonEntryBoots(resourcesDir, { timeoutMs: 1_500 })).toThrow(
+      /no usage line within 1500ms[\s\S]*still loading/
+    )
+  })
 })

@@ -9,6 +9,7 @@ import { getMobileEmulatorSearchEntries } from '@/components/settings/mobile-emu
 import { getQuickCommandsPaneSearchEntries } from '@/components/settings/quick-commands-search'
 import { getShareSkillsSettingsSearchEntries } from '@/components/settings/share-skills-settings-search'
 import { getTasksPaneSearchEntries } from '@/components/settings/tasks-search'
+import { getTestEnvironmentsSettingsSearchEntries } from '@/components/settings/test-environments-settings-search'
 import { translate } from '@/i18n/i18n'
 import type { SettingsNavSection } from '@/lib/settings-navigation-types'
 import {
@@ -86,6 +87,20 @@ export function buildWorkflowSettingsSections(
           )
         }
       ],
+      group: 'workflows'
+    },
+    {
+      id: 'test-environments',
+      title: translate(
+        'auto.hooks.useSettingsNavigationMetadata.testEnvironmentsTitle',
+        'Test Environments'
+      ),
+      description: translate(
+        'auto.hooks.useSettingsNavigationMetadata.testEnvironmentsDescription',
+        'Multi-repo environments with generated ports, launched from a workspace.'
+      ),
+      icon: Globe,
+      searchEntries: getTestEnvironmentsSettingsSearchEntries(),
       group: 'workflows'
     },
     {

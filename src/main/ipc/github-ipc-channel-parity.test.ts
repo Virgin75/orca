@@ -53,6 +53,7 @@ const EXPECTED_GITHUB_IPC_CHANNELS = [
   'gh:updateIssue',
   'gh:addIssueComment',
   'gh:listLabels',
+  'gh:listLabelColors',
   'gh:listAssignableUsers',
   'gh:viewer',
   'gh:checkOrcaStarred',

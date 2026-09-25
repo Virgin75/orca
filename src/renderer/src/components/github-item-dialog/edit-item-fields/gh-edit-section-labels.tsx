@@ -4,6 +4,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { cn } from '@/lib/utils'
 import { translate } from '@/i18n/i18n'
 import { GitHubLabelsSettingsLink } from './github-labels-settings-link'
+import { githubLabelBadgeStyle } from './github-label-color'
 
 const checkIcon = (
   <svg className="size-2.5" viewBox="0 0 12 12" fill="none">
@@ -118,7 +119,8 @@ export function GHEditSectionLabelsPill({
   isPending,
   popoverOpen,
   onPopoverOpenChange,
-  onToggle
+  onToggle,
+  labelColors
 }: {
   localLabels: string[]
   repoLabels: { data: string[]; loading: boolean; error: string | null }
@@ -127,19 +129,40 @@ export function GHEditSectionLabelsPill({
   popoverOpen: boolean
   onPopoverOpenChange: (open: boolean) => void
   onToggle: (label: string) => void
+  /** When given, each label renders as its own badge in the repo's label color. */
+  labelColors?: Record<string, string>
 }): React.JSX.Element {
+  const colored = labelColors !== undefined && localLabels.length > 0
   return (
     <Popover open={popoverOpen} onOpenChange={onPopoverOpenChange}>
       <PopoverTrigger asChild>
         <button
           type="button"
           disabled={isPending || repoLabels.loading}
-          className="group/labels inline-flex items-center gap-1 rounded-full border border-border/30 bg-muted/20 px-2 py-0.5 text-[11px] transition hover:brightness-125 hover:ring-1 hover:ring-white/10 disabled:opacity-50"
+          className={cn(
+            'group/labels inline-flex min-w-0 items-center gap-1 text-[11px] transition disabled:opacity-50',
+            colored
+              ? 'rounded-md hover:opacity-80'
+              : 'rounded-full border border-border/30 bg-muted/20 px-2 py-0.5 hover:brightness-125 hover:ring-1 hover:ring-white/10'
+          )}
         >
           {localLabels.length === 0 ? (
             <span className="text-muted-foreground">
               {translate('auto.components.GitHubItemDialog.f41ec96c13', '+ Label')}
             </span>
+          ) : colored ? (
+            localLabels.map((name) => {
+              const hex = labelColors[name]
+              return (
+                <span
+                  key={name}
+                  className="shrink-0 rounded-full border border-border px-1.5 text-[11px] font-medium leading-4 text-muted-foreground"
+                  style={hex ? githubLabelBadgeStyle(hex) : undefined}
+                >
+                  {name}
+                </span>
+              )
+            })
           ) : (
             localLabels.map((name) => (
               <span key={name} className="text-[10px] text-muted-foreground">

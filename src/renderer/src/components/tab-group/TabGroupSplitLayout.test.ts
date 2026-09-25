@@ -29,6 +29,10 @@ vi.mock('./TabGroupPanel', () => ({
   default: (props: unknown) => ({ __mock: 'TabGroupPanel', props })
 }))
 
+vi.mock('../workspace-header/WorkspaceHeader', () => ({
+  WorkspaceHeader: () => null
+}))
+
 vi.mock('./useTabDragSplit', () => ({
   useTabDragSplit: () => ({
     activeDrag: null,
@@ -81,7 +85,7 @@ describe('TabGroupSplitLayout', () => {
     const layoutWrapperChildren = React.Children.toArray(
       asElement(getLayoutWrapper(element)).props.children as React.ReactNode
     )
-    const splitBody = layoutWrapperChildren[1]
+    const splitBody = layoutWrapperChildren[2]
     const splitNodeElement = React.Children.only(
       asElement(splitBody).props.children as React.ReactNode
     )
@@ -116,8 +120,8 @@ describe('TabGroupSplitLayout', () => {
         isVisible: false,
         isFocused: false,
         hasSplitGroups: false,
-        reserveClosedExplorerToggleSpace: true,
-        reserveCollapsedSidebarHeaderSpace: true
+        reserveClosedExplorerToggleSpace: false,
+        reserveCollapsedSidebarHeaderSpace: false
       })
     )
   })
@@ -130,8 +134,8 @@ describe('TabGroupSplitLayout', () => {
         isVisible: true,
         isFocused: true,
         hasSplitGroups: false,
-        reserveClosedExplorerToggleSpace: true,
-        reserveCollapsedSidebarHeaderSpace: true
+        reserveClosedExplorerToggleSpace: false,
+        reserveCollapsedSidebarHeaderSpace: false
       })
     )
   })
@@ -147,7 +151,7 @@ describe('TabGroupSplitLayout', () => {
     expect(asElement(getLayoutWrapper(element)).props.ref).toBe(setDragRootNodeMock)
   })
 
-  it('only reserves top-right header space for the floating explorer toggle', () => {
+  it('leaves floating-toggle spacers to the workspace header, not the tab rows', () => {
     const element = TabGroupSplitLayout({
       layout: {
         type: 'split',
@@ -174,18 +178,14 @@ describe('TabGroupSplitLayout', () => {
       reserveCollapsedSidebarHeaderSpace: boolean
     }
 
-    expect(leftPanelProps).toEqual(
-      expect.objectContaining({
-        reserveClosedExplorerToggleSpace: false,
-        reserveCollapsedSidebarHeaderSpace: true
-      })
-    )
-    expect(rightPanelProps).toEqual(
-      expect.objectContaining({
-        reserveClosedExplorerToggleSpace: true,
-        reserveCollapsedSidebarHeaderSpace: false
-      })
-    )
+    for (const panelProps of [leftPanelProps, rightPanelProps]) {
+      expect(panelProps).toEqual(
+        expect.objectContaining({
+          reserveClosedExplorerToggleSpace: false,
+          reserveCollapsedSidebarHeaderSpace: false
+        })
+      )
+    }
   })
 
   it('records pane resizing at the start of the gesture', () => {

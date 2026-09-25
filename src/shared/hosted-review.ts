@@ -49,6 +49,8 @@ export type HostedReviewInfo = {
   confirmedContainedHeadOid?: string
   /** Target branch name for review-created worktree compare-base repair. */
   baseRefName?: string
+  /** Label names; absent when the provider or an older host did not report them. */
+  labels?: string[]
   conflictSummary?: PRConflictSummary
 }
 

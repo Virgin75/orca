@@ -17,6 +17,7 @@ import {
 } from './repository-routing'
 import { settingsForGitHubRepoOwner } from './work-item-routing'
 import { buildPRRefreshCandidate } from './worktree-refresh'
+import { isPullRequestGroupBy } from '../../../../shared/workspace-pr-grouping'
 
 export const createRefreshSweepActions = (
   set: Parameters<StateCreator<AppState>>[0],
@@ -54,7 +55,7 @@ export const createRefreshSweepActions = (
     const cardProps = state.worktreeCardProperties ?? []
     const rawCardProps = cardProps as readonly string[]
     const shouldRefreshIssues = (state.worktreeCardProperties ?? []).includes('issue')
-    const isPRStatusGrouping = state.groupBy === 'pr-status'
+    const isPRStatusGrouping = isPullRequestGroupBy(state.groupBy)
     const rightSidebarShowsPR = rightSidebarShowsPullRequestData(state)
     const shouldRefreshPRs =
       isPRStatusGrouping ||

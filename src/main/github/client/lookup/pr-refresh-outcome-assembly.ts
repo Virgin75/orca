@@ -6,7 +6,7 @@ import type {
 } from '../../../../shared/github/pull-request-types'
 import { deriveCheckStatus, mapPRState } from '../../mappers'
 import type { OwnerRepo } from '../../gh-utils'
-import type { PullRequestLookupData } from './pull-request-lookup-data'
+import { pullRequestLabelNames, type PullRequestLookupData } from './pull-request-lookup-data'
 
 export function assemblePRRefreshFoundOutcome(args: {
   data: PullRequestLookupData
@@ -30,6 +30,7 @@ export function assemblePRRefreshFoundOutcome(args: {
     headDivergedFromMergedPRAtOid,
     conflictSummary
   } = args
+  const labels = pullRequestLabelNames(data)
   return {
     kind: 'found',
     fetchedAt: Date.now(),
@@ -62,6 +63,7 @@ export function assemblePRRefreshFoundOutcome(args: {
       ...(headDivergedFromMergedPRAtOid ? { headDivergedFromMergedPRAtOid } : {}),
       ...(data.baseRefName ? { baseRefName: data.baseRefName } : {}),
       ...(data.headRefName ? { headRefName: data.headRefName } : {}),
+      ...(labels ? { labels } : {}),
       prRepo: dataRepo ?? undefined,
       headRepo: dataHeadRepo ?? undefined,
       conflictSummary

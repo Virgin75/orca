@@ -39,6 +39,7 @@ export type PullRequestLookupData = {
   headRefOid?: string
   stack?: GitHubPRStack
   stackMetadataChecked?: boolean
+  labels?: { name?: unknown }[]
 }
 
 export type RestPullRequest = {
@@ -54,6 +55,7 @@ export type RestPullRequest = {
   mergeable_state?: string | null
   base?: { ref?: string; sha?: string }
   head?: { ref?: string; sha?: string }
+  labels?: { name?: unknown }[]
   stack?: {
     number?: number
     position?: number
@@ -63,10 +65,10 @@ export type RestPullRequest = {
 }
 
 export const PR_LOOKUP_JSON_FIELDS =
-  'number,title,state,url,statusCheckRollup,updatedAt,isDraft,mergeable,reviewDecision,mergeStateStatus,autoMergeRequest,baseRefName,headRefName,baseRefOid,headRefOid'
+  'number,title,state,url,statusCheckRollup,updatedAt,isDraft,mergeable,reviewDecision,mergeStateStatus,autoMergeRequest,baseRefName,headRefName,baseRefOid,headRefOid,labels'
 
 export const PR_BRANCH_LIST_JSON_FIELDS =
-  'number,title,state,url,statusCheckRollup,updatedAt,isDraft,mergeable,baseRefName,headRefName,baseRefOid,headRefOid'
+  'number,title,state,url,statusCheckRollup,updatedAt,isDraft,mergeable,baseRefName,headRefName,baseRefOid,headRefOid,labels'
 
 export type GitHubPRBranchLookupOptions = HostedReviewExecutionOptions & {
   acceptMergedFallbackPR?: boolean
@@ -120,9 +122,22 @@ export function mapRestPullRequest(pr: RestPullRequest): PullRequestLookupData {
     headRefName: pr.head?.ref,
     baseRefOid: pr.base?.sha,
     headRefOid: pr.head?.sha,
+    ...(Array.isArray(pr.labels) ? { labels: pr.labels } : {}),
     stackMetadataChecked: true,
     ...(stack ? { stack } : {})
   }
+}
+
+/** Label names from gh/REST label objects; undefined when the payload carried no label list. */
+export function pullRequestLabelNames(
+  data: Pick<PullRequestLookupData, 'labels'>
+): string[] | undefined {
+  if (!Array.isArray(data.labels)) {
+    return undefined
+  }
+  return data.labels.flatMap((label) =>
+    typeof label?.name === 'string' && label.name.length > 0 ? [label.name] : []
+  )
 }
 
 export function isMergedImplicitPR(

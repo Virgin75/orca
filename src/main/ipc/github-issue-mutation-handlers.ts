@@ -2,7 +2,13 @@ import { ipcMain } from 'electron'
 import type { GitHubOwnerRepo } from '../../shared/github/pull-request-types'
 import type { GitHubIssueUpdate } from '../../shared/issue-mutation-types'
 import type { TaskSourceContext } from '../../shared/task-source-context'
-import { addIssueComment, listAssignableUsers, listLabels, updateIssue } from '../github/client'
+import {
+  addIssueComment,
+  listAssignableUsers,
+  listLabelColors,
+  listLabels,
+  updateIssue
+} from '../github/client'
 import type { Store } from '../persistence'
 import {
   assertRegisteredGitHubRepo,
@@ -87,6 +93,16 @@ export function registerGitHubIssueMutationHandlers(store: Store): void {
   ipcMain.handle('gh:listLabels', (_event, args: GitHubRepoScopedArgs) => {
     const repo = assertRegisteredGitHubRepo(args, store)
     return listLabels(
+      repo.path,
+      repo.issueSourcePreference,
+      getGitHubRepoConnectionId(repo),
+      ...getGitHubLocalGitOptionArgs(store, repo)
+    )
+  })
+
+  ipcMain.handle('gh:listLabelColors', (_event, args: GitHubRepoScopedArgs) => {
+    const repo = assertRegisteredGitHubRepo(args, store)
+    return listLabelColors(
       repo.path,
       repo.issueSourcePreference,
       getGitHubRepoConnectionId(repo),
