@@ -15,6 +15,8 @@ import {
 import { useShortcutLabel } from '@/hooks/useShortcutLabel'
 import { translate } from '@/i18n/i18n'
 import { AgentSessionHistoryIcon } from './agent-session-history-icon'
+import { NotionIcon } from '@/components/icons/NotionIcon'
+import { isNotionAvailable } from '@/store/notion-tickets'
 import type { ActivityBarItem } from './activity-bar-buttons'
 
 export type RightSidebarActivityItems = {
@@ -111,6 +113,19 @@ export function useRightSidebarActivityItems({
         shortcut: portsShortcut === 'Unassigned' ? '' : portsShortcut,
         sshOnly: true
       },
+      ...(isNotionAvailable()
+        ? [
+            {
+              id: 'notion' as const,
+              icon: NotionIcon,
+              title: translate(
+                'auto.components.right.sidebar.index.notionTickets',
+                'Notion tickets'
+              ),
+              shortcut: ''
+            }
+          ]
+        : []),
       // Why: plugin panels append after the built-in tabs so core navigation
       // keeps stable positions regardless of which plugins are installed.
       ...getPluginPanelActivityItems(visiblePluginPanels, pluginPanelErrors)

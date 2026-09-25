@@ -133,6 +133,8 @@ export const ghMutationsAndProjectsApi = {
     repoId?: string | null
     sourceContext?: TaskSourceContext | null
   }): Promise<string[]> => ipcRenderer.invoke('gh:listLabels', args),
+  listLabelColors: (args: { repoPath: string; repoId?: string }): Promise<Record<string, string>> =>
+    ipcRenderer.invoke('gh:listLabelColors', args),
   listAssignableUsers: (args: {
     repoPath: string
     repoId?: string | null

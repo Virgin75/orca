@@ -382,6 +382,10 @@ vi.mock('../bitbucket', () => ({
   registerBitbucketHandlers: registerBitbucketHandlersMock
 }))
 
+vi.mock('../notion', () => ({
+  registerNotionHandlers: vi.fn()
+}))
+
 vi.mock('../gitlab', () => ({
   registerGitLabHandlers: registerGitLabHandlersMock
 }))

@@ -41,6 +41,7 @@ describe('web GitHub preload API', () => {
         'listBindableAccounts',
         'listIssueTypesBySlug',
         'listIssues',
+        'listLabelColors',
         'listLabels',
         'listLabelsBySlug',
         'listProjectViews',

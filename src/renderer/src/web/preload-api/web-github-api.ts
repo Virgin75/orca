@@ -119,6 +119,8 @@ export function createGitHubApi(): WebGitHubApi {
       route<WebGitHubResult<'addPRReviewComment'>>(GITHUB_WEB_RPC_METHODS.addPRReviewComment, args),
     listLabels: (args) =>
       route<WebGitHubResult<'listLabels'>>(GITHUB_WEB_RPC_METHODS.listLabels, args),
+    // Why: label colors are a desktop-only lookup; remote hosts expose names only.
+    listLabelColors: () => Promise.resolve({}),
     listAssignableUsers: (args) =>
       route<WebGitHubResult<'listAssignableUsers'>>(
         GITHUB_WEB_RPC_METHODS.listAssignableUsers,

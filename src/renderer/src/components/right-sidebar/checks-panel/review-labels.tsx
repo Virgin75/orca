@@ -20,11 +20,14 @@ export function toggleReviewLabel(labels: readonly string[], label: string): str
 export function ChecksPanelReviewLabels({
   review,
   repo,
-  onMutated
+  onMutated,
+  labelColors
 }: {
   review: Pick<ChecksPanelReview, 'number' | 'url' | 'labels'>
   repo: { id: string; path: string }
   onMutated: () => Promise<void> | void
+  /** Repo label colors; when set, labels render as colored badges. */
+  labelColors?: Record<string, string>
 }): React.JSX.Element {
   const reviewLabels = review.labels ?? EMPTY_LABELS
   const [localLabels, setLocalLabels] = useState<string[]>(reviewLabels)
@@ -73,6 +76,7 @@ export function ChecksPanelReviewLabels({
         popoverOpen={popoverOpen}
         onPopoverOpenChange={setPopoverOpen}
         onToggle={handleToggle}
+        labelColors={labelColors}
       />
     </div>
   )

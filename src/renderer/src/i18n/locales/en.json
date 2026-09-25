@@ -12924,7 +12924,8 @@
             "fc3095d2ed": "explorer",
             "aiVaultSessionHistory": "Agents",
             "folderWorkspaces": "Attached worktrees",
-            "parentPrChecks": "PR Checks"
+            "parentPrChecks": "PR Checks",
+            "notionTickets": "Notion tickets"
           },
           "right": {
             "panel": {
@@ -17116,6 +17117,41 @@
         "pendingComment": "1 pending comment",
         "pendingComments": "{{value0}} pending comments",
         "reviewerNames": "Reviewer: {{value0}}"
+      },
+      "notion": {
+        "addTicket": "Add ticket",
+        "searchTickets": "Search tickets…",
+        "noTickets": "No matching tickets",
+        "searchHint": "Type to search the Tasks database. The first search may open Notion sign-in in your browser.",
+        "selectedCount": "{{value0}} selected",
+        "linkTickets": "Link tickets",
+        "priority": "Priority",
+        "editStatus": "Change status",
+        "openTicket": "Open ticket {{value0}}",
+        "unavailable": "Notion tickets are available in the desktop app.",
+        "empty": "No Notion tickets linked to this workspace yet. Use Add ticket to link some.",
+        "refresh": "Refresh",
+        "openInNotion": "Open in Notion",
+        "unlink": "Unlink from workspace",
+        "noContent": "This ticket has no content.",
+        "comments": "Comments ({{value0}})",
+        "someone": "Notion user",
+        "fromUrl": "From URL",
+        "fromSearch": "From search",
+        "urlPlaceholder": "https://www.notion.so/… ticket URL",
+        "linkTicket": "Link ticket",
+        "postComment": "Comment",
+        "reply": "Reply…",
+        "addComment": "Add comment",
+        "commentOn": "Comment on “{{value0}}”",
+        "addCommentPlaceholder": "Add a comment…",
+        "discussionUnavailable": "This discussion is resolved or no longer available.",
+        "editContent": "Ticket content",
+        "editHint": "Notion-flavored Markdown. Only changed lines are sent to Notion.",
+        "cancelEdit": "Cancel",
+        "saveEdit": "Save",
+        "edit": "Edit",
+        "exitEdit": "Exit edit mode"
       }
     },
     "i18n": {

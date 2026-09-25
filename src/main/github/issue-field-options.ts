@@ -53,6 +53,58 @@ export async function listLabels(
   }
 }
 
+/** Label name → hex color (no `#`). Desktop-only companion to `listLabels`, whose
+ *  string[] shape crosses the runtime RPC boundary and must stay unchanged. */
+export async function listLabelColors(
+  repoPath: string,
+  preference?: IssueSourcePreference,
+  connectionId?: string | null,
+  localGitOptions: LocalGitExecOptions = {}
+): Promise<Record<string, string>> {
+  const { ownerRepo, ghOptions } = await resolveGitHubRepoExecution(
+    repoPath,
+    async () =>
+      (
+        await resolveIssueGitHubApiRepositorySource(
+          repoPath,
+          preference,
+          connectionId,
+          localGitOptions
+        )
+      ).source,
+    connectionId,
+    localGitOptions
+  )
+  if (!ownerRepo) {
+    return {}
+  }
+  await acquire()
+  try {
+    const { stdout } = await ghExecFileAsync(
+      [
+        'api',
+        '--paginate',
+        `repos/${ownerRepo.owner}/${ownerRepo.repo}/labels`,
+        '--jq',
+        '.[] | [.name, .color] | @tsv'
+      ],
+      ghOptions
+    )
+    const colors: Record<string, string> = {}
+    for (const line of stdout.split('\n')) {
+      const [name, color] = line.split('\t')
+      if (name && color && /^[0-9a-f]{6}$/i.test(color.trim())) {
+        colors[name] = color.trim().toLowerCase()
+      }
+    }
+    return colors
+  } catch {
+    return {}
+  } finally {
+    release()
+  }
+}
+
 export async function listAssignableUsers(
   repoPath: string,
   preference?: IssueSourcePreference,

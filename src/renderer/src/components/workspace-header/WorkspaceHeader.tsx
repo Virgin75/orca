@@ -1,25 +1,31 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
-import { GitBranch } from 'lucide-react'
+import { GitBranch, Github, Gitlab, GitPullRequest } from 'lucide-react'
 import { useAppStore } from '@/store'
 import { useRepoById, useWorktreeById } from '@/store/selectors'
 import { cn } from '@/lib/utils'
 import { translate } from '@/i18n/i18n'
 import { openWorkspaceBrowserTab } from '@/lib/workspace-browser-tab-open'
-import { resolveWorktreeDisplayName } from '@/lib/worktree-default-display-name'
 import { getProviderChecksLabel } from '../../../../shared/provider-check-summary'
 import type { Repo } from '../../../../shared/repo-types'
 import type { Worktree } from '../../../../shared/worktree/types'
 import { useWorktreeCardReviewDetails } from '../sidebar/use-worktree-card-review-details'
-import { getReviewLabel, ReviewIcon } from '../sidebar/worktree-review-helpers'
-import { getChecksPillTone } from '../task-page-checks-pill'
+import { getProviderName, getReviewLabel, ReviewIcon } from '../sidebar/worktree-review-helpers'
+import { WorkspaceHeaderSourceBadge } from './WorkspaceHeaderSourceBadge'
+import { getChecksTextTone } from '../task-page-checks-pill'
 import { ChecksPanelReviewLabels } from '../right-sidebar/checks-panel/review-labels'
 import { refreshHostedReviewCard } from '@/store/slices/hosted-review-card-refresh'
 import { useWorkspacePRWorkItem } from './use-workspace-pr-work-item'
 import { useWorkspacePRPendingComments } from './use-workspace-pr-pending-comments'
 import { WorkspaceHeaderReviewers } from './WorkspaceHeaderReviewers'
+import { useHeaderRefreshTick } from './use-header-refresh-tick'
+import { useRepoLabelColors } from './use-repo-label-colors'
 
-/** Two-line workspace header above every tab group: PR context, then the workspace name. */
+// Why: ~3 GitHub calls per tick, only for the visible workspace — well inside the rate limit.
+const PR_REFRESH_INTERVAL_MS = 2 * 60_000
+import { WorkspaceNotionTicketsBar } from '../notion/WorkspaceNotionTicketsBar'
+
+/** Workspace header above every tab group: Notion tickets, then review context. */
 export function WorkspaceHeader({
   worktreeId,
   isWorktreeActive
@@ -67,8 +73,12 @@ function WorkspaceHeaderContent({
     newCardStyle: false
   })
   const isGitHubPR = prDisplay?.provider === 'github'
+  const refreshTick = useHeaderRefreshTick(
+    isWorktreeActive && Boolean(repo && branch),
+    PR_REFRESH_INTERVAL_MS
+  )
   const headSha = prDisplay && 'headSha' in prDisplay ? prDisplay.headSha : undefined
-  const freshnessKey = `${headSha ?? ''}:${prDisplay?.status ?? ''}:${prDisplay?.state ?? ''}`
+  const freshnessKey = `${headSha ?? ''}:${prDisplay?.status ?? ''}:${prDisplay?.state ?? ''}:${refreshTick}`
   const { item, patchItem } = useWorkspacePRWorkItem({
     repo: repo ?? null,
     prNumber: isGitHubPR ? prDisplay.number : null,
@@ -80,14 +90,13 @@ function WorkspaceHeaderContent({
     branch,
     prNumber: isGitHubPR ? prDisplay.number : null,
     freshnessKey,
+    refreshTick,
     enabled: isWorktreeActive
   })
+  const labelColors = useRepoLabelColors(repo ?? null, isWorktreeActive && isGitHubPR, refreshTick)
   const checksSummary = item?.number === prDisplay?.number ? item?.checksSummary : undefined
   const branchLabel = branch || detachedHeadDisplay?.sidebarLabel || ''
   const reviewUrl = prDisplay?.url
-  const workspaceName = resolveWorktreeDisplayName(worktree)
-  // Why: linked-review fallbacks carry an empty title until the provider lookup lands.
-  const secondLine = prDisplay?.title.trim() || workspaceName
 
   const openReview = useCallback((): void => {
     if (!reviewUrl) {
@@ -106,18 +115,36 @@ function WorkspaceHeaderContent({
     })
   }, [reviewUrl, worktree.id])
 
-  const refreshReviewAfterLabelEdit = useCallback(async (): Promise<void> => {
-    if (!repo || !branch) {
-      return
+  const refreshReview = useCallback(
+    async (admissionTier?: 'background'): Promise<void> => {
+      if (!repo || !branch) {
+        return
+      }
+      await refreshHostedReviewCard(fetchHostedReviewForBranch, {
+        repoPath: repo.path,
+        repoId: repo.id,
+        branch,
+        admissionTier,
+        linkedGitHubPR: worktree.linkedPR,
+        fallbackGitHubPR: prDisplay?.number ?? null
+      })
+    },
+    [branch, fetchHostedReviewForBranch, prDisplay?.number, repo, worktree.linkedPR]
+  )
+  const refreshReviewAfterLabelEdit = useCallback(() => refreshReview(), [refreshReview])
+
+  const refreshReviewRef = useRef(refreshReview)
+  useEffect(() => {
+    refreshReviewRef.current = refreshReview
+  }, [refreshReview])
+  // Periodic refresh: PR title/state/labels come from the hosted-review card, not the work item.
+  useEffect(() => {
+    if (refreshTick > 0) {
+      void refreshReviewRef.current('background').catch((error: unknown) => {
+        console.warn('[workspace-header] PR refresh failed', error)
+      })
     }
-    await refreshHostedReviewCard(fetchHostedReviewForBranch, {
-      repoPath: repo.path,
-      repoId: repo.id,
-      branch,
-      linkedGitHubPR: worktree.linkedPR,
-      fallbackGitHubPR: prDisplay?.number ?? null
-    })
-  }, [branch, fetchHostedReviewForBranch, prDisplay?.number, repo, worktree.linkedPR])
+  }, [refreshTick])
 
   const openChecks = useCallback((): void => {
     setRightSidebarOpen(true)
@@ -138,7 +165,14 @@ function WorkspaceHeaderContent({
         />
       ) : null}
       <div className="flex min-w-0 flex-1 flex-col justify-center gap-0.5 px-3 py-1">
+        <WorkspaceNotionTicketsBar worktreeId={worktree.id} isWorktreeActive={isWorktreeActive} />
         <div className="flex h-5 min-w-0 items-center gap-2 overflow-hidden text-xs text-muted-foreground">
+          {prDisplay ? (
+            <WorkspaceHeaderSourceBadge
+              icon={<ProviderIcon provider={prDisplay.provider} />}
+              label={getProviderName(prDisplay)}
+            />
+          ) : null}
           {prDisplay ? (
             <button
               type="button"
@@ -181,6 +215,7 @@ function WorkspaceHeaderContent({
                     (item?.number === prDisplay.number ? item.labels : undefined)
                 }}
                 repo={repo}
+                labelColors={labelColors}
                 onMutated={refreshReviewAfterLabelEdit}
               />
             </div>
@@ -192,8 +227,8 @@ function WorkspaceHeaderContent({
               title={getProviderChecksLabel(checksSummary)}
               aria-label={translate('auto.components.workspaceHeader.openChecks', 'Show checks')}
               className={cn(
-                'workspace-header-no-drag shrink-0 rounded-full border px-1.5 text-[11px] font-medium leading-4 tabular-nums transition hover:opacity-80',
-                getChecksPillTone({ checksSummary })
+                'workspace-header-no-drag shrink-0 rounded px-1 font-medium tabular-nums transition hover:bg-accent',
+                getChecksTextTone({ checksSummary })
               )}
             >
               {translate(
@@ -231,12 +266,6 @@ function WorkspaceHeaderContent({
             </div>
           ) : null}
         </div>
-        <div
-          className="truncate text-[13px] font-medium leading-4 text-foreground"
-          title={workspaceName}
-        >
-          {secondLine}
-        </div>
       </div>
       {!rightSidebarOpen ? (
         <div
@@ -246,4 +275,14 @@ function WorkspaceHeaderContent({
       ) : null}
     </div>
   )
+}
+
+function ProviderIcon({ provider }: { provider: string }): React.JSX.Element {
+  if (provider === 'github') {
+    return <Github />
+  }
+  if (provider === 'gitlab') {
+    return <Gitlab />
+  }
+  return <GitPullRequest />
 }

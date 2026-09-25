@@ -15,6 +15,7 @@ const CLIENT_EXPORTS = [
   'updateIssue',
   'addIssueComment',
   'listLabels',
+  'listLabelColors',
   'listAssignableUsers',
   'getAuthenticatedViewer',
   'getPRChecks',

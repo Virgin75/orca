@@ -22,12 +22,15 @@ export function useWorkspacePRPendingComments({
   branch,
   prNumber,
   freshnessKey,
+  refreshTick = 0,
   enabled
 }: {
   repo: Repo | null
   branch: string
   prNumber: number | null
   freshnessKey: string
+  /** Bumped by the header's periodic refresh; a bump bypasses the comments TTL. */
+  refreshTick?: number
   enabled: boolean
 }): number | null {
   const settings = useAppStore((s) => s.settings)
@@ -66,12 +69,14 @@ export function useWorkspacePRPendingComments({
       return
     }
     // Why: the store action honours its TTL and dedupes in-flight requests with the Checks panel.
-    void fetchPRComments(repo.path, prNumber, { repoId: repo.id, prRepo }).catch(
-      (error: unknown) => {
-        console.warn('[workspace-header] PR comments lookup failed', error)
-      }
-    )
-  }, [enabled, fetchPRComments, freshnessKey, prNumber, prRepo, repo])
+    void fetchPRComments(repo.path, prNumber, {
+      repoId: repo.id,
+      prRepo,
+      ...(refreshTick > 0 ? { force: true } : {})
+    }).catch((error: unknown) => {
+      console.warn('[workspace-header] PR comments lookup failed', error)
+    })
+  }, [enabled, fetchPRComments, freshnessKey, prNumber, prRepo, refreshTick, repo])
 
   return comments ? countPendingReviewThreads(comments) : null
 }
